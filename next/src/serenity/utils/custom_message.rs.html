@@ -152,7 +152,7 @@
 <a href=#152 id=152 data-nosnippet>152</a>    ///
 <a href=#153 id=153 data-nosnippet>153</a>    /// If not used, the default value is an empty vector (`Vec::default()`).
 <a href=#154 id=154 data-nosnippet>154</a>    </span><span class="kw">pub fn </span>reactions(<span class="kw-2">&amp;mut </span><span class="self">self</span>, reactions: Vec&lt;MessageReaction&gt;) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-<a href=#155 id=155 data-nosnippet>155</a>        <span class="self">self</span>.msg.reactions = reactions.trunc_into();
+<a href=#155 id=155 data-nosnippet>155</a>        <span class="self">self</span>.msg.reactions = reactions;
 <a href=#156 id=156 data-nosnippet>156</a>
 <a href=#157 id=157 data-nosnippet>157</a>        <span class="self">self
 <a href=#158 id=158 data-nosnippet>158</a>    </span>}
