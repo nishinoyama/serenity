@@ -4,9 +4,9 @@
 <a href=#4 id=4 data-nosnippet>4</a>
 <a href=#5 id=5 data-nosnippet>5</a><span class="doccomment">/// Various information about integrations.
 <a href=#6 id=6 data-nosnippet>6</a>///
-<a href=#7 id=7 data-nosnippet>7</a>/// [Discord docs](https://discord.com/developers/docs/resources/guild#integration-object),
-<a href=#8 id=8 data-nosnippet>8</a>/// [extra fields 1](https://discord.com/developers/docs/topics/gateway-events#integration-create),
-<a href=#9 id=9 data-nosnippet>9</a>/// [extra fields 2](https://discord.com/developers/docs/topics/gateway-events#integration-update),
+<a href=#7 id=7 data-nosnippet>7</a>/// [Discord docs](https://docs.discord.com/developers/resources/guild#integration-object),
+<a href=#8 id=8 data-nosnippet>8</a>/// [extra fields 1](https://docs.discord.com/developers/events/gateway-events#integration-create),
+<a href=#9 id=9 data-nosnippet>9</a>/// [extra fields 2](https://docs.discord.com/developers/events/gateway-events#integration-update),
 <a href=#10 id=10 data-nosnippet>10</a></span><span class="attr">#[bool_to_bitflags::bool_to_bitflags]
 <a href=#11 id=11 data-nosnippet>11</a>#[cfg_attr(feature = <span class="string">"typesize"</span>, derive(typesize::derive::TypeSize))]
 <a href=#12 id=12 data-nosnippet>12</a>#[derive(Clone, Debug, serde::Deserialize, serde::Serialize)]
@@ -37,7 +37,7 @@
 <a href=#37 id=37 data-nosnippet>37</a><span class="macro">enum_number!</span> {
 <a href=#38 id=38 data-nosnippet>38</a>    <span class="doccomment">/// The behavior once the integration expires.
 <a href=#39 id=39 data-nosnippet>39</a>    ///
-<a href=#40 id=40 data-nosnippet>40</a>    /// [Discord docs](https://discord.com/developers/docs/resources/guild#integration-object-integration-expire-behaviors).
+<a href=#40 id=40 data-nosnippet>40</a>    /// [Discord docs](https://docs.discord.com/developers/resources/guild#integration-object-integration-expire-behaviors).
 <a href=#41 id=41 data-nosnippet>41</a>    </span><span class="attr">#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Deserialize, Serialize)]
 <a href=#42 id=42 data-nosnippet>42</a>    #[cfg_attr(feature = <span class="string">"typesize"</span>, derive(typesize::derive::TypeSize))]
 <a href=#43 id=43 data-nosnippet>43</a>    #[non_exhaustive]
@@ -57,7 +57,7 @@
 <a href=#57 id=57 data-nosnippet>57</a>
 <a href=#58 id=58 data-nosnippet>58</a><span class="doccomment">/// Integration account object.
 <a href=#59 id=59 data-nosnippet>59</a>///
-<a href=#60 id=60 data-nosnippet>60</a>/// [Discord docs](https://discord.com/developers/docs/resources/guild#integration-account-object).
+<a href=#60 id=60 data-nosnippet>60</a>/// [Discord docs](https://docs.discord.com/developers/resources/guild#integration-account-object).
 <a href=#61 id=61 data-nosnippet>61</a></span><span class="attr">#[cfg_attr(feature = <span class="string">"typesize"</span>, derive(typesize::derive::TypeSize))]
 <a href=#62 id=62 data-nosnippet>62</a>#[derive(Clone, Debug, Deserialize, Serialize)]
 <a href=#63 id=63 data-nosnippet>63</a>#[non_exhaustive]
@@ -68,7 +68,7 @@
 <a href=#68 id=68 data-nosnippet>68</a>
 <a href=#69 id=69 data-nosnippet>69</a><span class="doccomment">/// Integration application object.
 <a href=#70 id=70 data-nosnippet>70</a>///
-<a href=#71 id=71 data-nosnippet>71</a>/// [Discord docs](https://discord.com/developers/docs/resources/guild#integration-application-object).
+<a href=#71 id=71 data-nosnippet>71</a>/// [Discord docs](https://docs.discord.com/developers/resources/guild#integration-application-object).
 <a href=#72 id=72 data-nosnippet>72</a></span><span class="attr">#[cfg_attr(feature = <span class="string">"typesize"</span>, derive(typesize::derive::TypeSize))]
 <a href=#73 id=73 data-nosnippet>73</a>#[derive(Clone, Debug, Deserialize, Serialize)]
 <a href=#74 id=74 data-nosnippet>74</a>#[non_exhaustive]

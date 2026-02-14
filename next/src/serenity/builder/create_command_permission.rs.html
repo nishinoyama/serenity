@@ -8,7 +8,7 @@
 <a href=#8 id=8 data-nosnippet>8</a>
 <a href=#9 id=9 data-nosnippet>9</a><span class="doccomment">/// A builder for creating several [`CommandPermission`].
 <a href=#10 id=10 data-nosnippet>10</a>///
-<a href=#11 id=11 data-nosnippet>11</a>/// [Discord docs](https://discord.com/developers/docs/interactions/application-commands#edit-application-command-permissions).
+<a href=#11 id=11 data-nosnippet>11</a>/// [Discord docs](https://docs.discord.com/developers/interactions/application-commands#edit-application-command-permissions).
 <a href=#12 id=12 data-nosnippet>12</a></span><span class="comment">// Cannot be replaced by a simple Vec&lt;CreateCommandPermission&gt; because we need the schema with
 <a href=#13 id=13 data-nosnippet>13</a>// the `permissions` field, and also to be forward compatible if a new field beyond just
 <a href=#14 id=14 data-nosnippet>14</a>// `permissions` is added to the HTTP endpoint
@@ -36,7 +36,7 @@
 <a href=#36 id=36 data-nosnippet>36</a>    ///
 <a href=#37 id=37 data-nosnippet>37</a>    /// May also return [`Error::Json`] if there is an error in deserializing the API response.
 <a href=#38 id=38 data-nosnippet>38</a>    ///
-<a href=#39 id=39 data-nosnippet>39</a>    /// [Discord's docs]: https://discord.com/developers/docs/interactions/slash-commands
+<a href=#39 id=39 data-nosnippet>39</a>    /// [Discord's docs]: https://docs.discord.com/developers/interactions/application-commands#slash-commands
 <a href=#40 id=40 data-nosnippet>40</a>    </span><span class="attr">#[cfg(feature = <span class="string">"http"</span>)]
 <a href=#41 id=41 data-nosnippet>41</a>    </span><span class="kw">pub async fn </span>execute(
 <a href=#42 id=42 data-nosnippet>42</a>        <span class="self">self</span>,
@@ -50,7 +50,7 @@
 <a href=#50 id=50 data-nosnippet>50</a>
 <a href=#51 id=51 data-nosnippet>51</a><span class="doccomment">/// A builder for creating an [`CommandPermission`].
 <a href=#52 id=52 data-nosnippet>52</a>///
-<a href=#53 id=53 data-nosnippet>53</a>/// [Discord docs](https://discord.com/developers/docs/interactions/application-commands#application-command-permissions-object-application-command-permissions-structure).
+<a href=#53 id=53 data-nosnippet>53</a>/// [Discord docs](https://docs.discord.com/developers/interactions/application-commands#application-command-permissions-object-application-command-permissions-structure).
 <a href=#54 id=54 data-nosnippet>54</a></span><span class="attr">#[derive(Clone, Debug, Serialize)]
 <a href=#55 id=55 data-nosnippet>55</a>#[must_use]
 <a href=#56 id=56 data-nosnippet>56</a></span><span class="kw">pub struct </span>CreateCommandPermission(CommandPermission);

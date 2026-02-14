@@ -32,7 +32,7 @@
 <a href=#32 id=32 data-nosnippet>32</a>/// # }
 <a href=#33 id=33 data-nosnippet>33</a>/// ```
 <a href=#34 id=34 data-nosnippet>34</a>///
-<a href=#35 id=35 data-nosnippet>35</a>/// [Discord docs](https://discord.com/developers/docs/resources/channel#edit-message)
+<a href=#35 id=35 data-nosnippet>35</a>/// [Discord docs](https://docs.discord.com/developers/resources/message#edit-message)
 <a href=#36 id=36 data-nosnippet>36</a></span><span class="attr">#[derive(Clone, Debug, Default, Serialize)]
 <a href=#37 id=37 data-nosnippet>37</a>#[must_use]
 <a href=#38 id=38 data-nosnippet>38</a></span><span class="kw">pub struct </span>EditMessage&lt;<span class="lifetime">'a</span>&gt; {
@@ -121,7 +121,7 @@
 <a href=#121 id=121 data-nosnippet>121</a>    ///
 <a href=#122 id=122 data-nosnippet>122</a>    /// [`CreateMessage::flags`]: super::CreateMessage::flags
 <a href=#123 id=123 data-nosnippet>123</a>    </span><span class="kw">pub fn </span>suppress_embeds(<span class="kw-2">mut </span><span class="self">self</span>, suppress: bool) -&gt; <span class="self">Self </span>{
-<a href=#124 id=124 data-nosnippet>124</a>        <span class="comment">// See for details: https://discord.com/developers/docs/resources/message#edit-message-jsonform-params
+<a href=#124 id=124 data-nosnippet>124</a>        <span class="comment">// See for details: https://docs.discord.com/developers/resources/message#edit-message-json/form-params
 <a href=#125 id=125 data-nosnippet>125</a>        </span><span class="self">self</span>.flags
 <a href=#126 id=126 data-nosnippet>126</a>            .get_or_insert(MessageFlags::empty())
 <a href=#127 id=127 data-nosnippet>127</a>            .set(MessageFlags::SUPPRESS_EMBEDS, suppress);

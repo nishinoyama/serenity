@@ -12,7 +12,7 @@
 <a href=#12 id=12 data-nosnippet>12</a>//!
 <a href=#13 id=13 data-nosnippet>13</a>//! [`ChannelId::send_message`]: crate::model::id::ChannelId::send_message
 <a href=#14 id=14 data-nosnippet>14</a>//! [`ExecuteWebhook::embeds`]: crate::builder::ExecuteWebhook::embeds
-<a href=#15 id=15 data-nosnippet>15</a>//! [here]: https://discord.com/developers/docs/resources/channel#embed-object
+<a href=#15 id=15 data-nosnippet>15</a>//! [here]: https://docs.discord.com/developers/resources/message#embed-object
 <a href=#16 id=16 data-nosnippet>16</a>
 <a href=#17 id=17 data-nosnippet>17</a></span><span class="kw">use </span>std::borrow::Cow;
 <a href=#18 id=18 data-nosnippet>18</a>
@@ -20,7 +20,7 @@
 <a href=#20 id=20 data-nosnippet>20</a>
 <a href=#21 id=21 data-nosnippet>21</a><span class="doccomment">/// A builder to create an embed in a message
 <a href=#22 id=22 data-nosnippet>22</a>///
-<a href=#23 id=23 data-nosnippet>23</a>/// [Discord docs](https://discord.com/developers/docs/resources/channel#embed-object)
+<a href=#23 id=23 data-nosnippet>23</a>/// [Discord docs](https://docs.discord.com/developers/resources/message#embed-object)
 <a href=#24 id=24 data-nosnippet>24</a></span><span class="attr">#[derive(Clone, Debug, Serialize)]
 <a href=#25 id=25 data-nosnippet>25</a>#[must_use]
 <a href=#26 id=26 data-nosnippet>26</a></span><span class="kw">pub struct </span>CreateEmbed&lt;<span class="lifetime">'a</span>&gt; {
@@ -133,7 +133,7 @@
 <a href=#133 id=133 data-nosnippet>133</a>
 <a href=#134 id=134 data-nosnippet>134</a>    <span class="doccomment">/// Set the image associated with the embed.
 <a href=#135 id=135 data-nosnippet>135</a>    ///
-<a href=#136 id=136 data-nosnippet>136</a>    /// Refer [Discord Documentation](https://discord.com/developers/docs/reference#uploading-files)
+<a href=#136 id=136 data-nosnippet>136</a>    /// Refer [Discord Documentation](https://docs.discord.com/developers/reference#uploading-files)
 <a href=#137 id=137 data-nosnippet>137</a>    /// for rules on naming local attachments.
 <a href=#138 id=138 data-nosnippet>138</a>    </span><span class="kw">pub fn </span>image(<span class="kw-2">mut </span><span class="self">self</span>, url: <span class="kw">impl </span>Into&lt;Cow&lt;<span class="lifetime">'a</span>, str&gt;&gt;) -&gt; <span class="self">Self </span>{
 <a href=#139 id=139 data-nosnippet>139</a>        <span class="self">self</span>.image = <span class="prelude-val">Some</span>(CreateEmbedImage {

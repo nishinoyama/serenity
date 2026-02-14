@@ -3,11 +3,11 @@
     pub members: FixedArray&lt;<a class="struct" href="struct.ThreadMember.html" title="struct serenity::model::channel::ThreadMember">ThreadMember</a>&gt;,
     pub has_more: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>,
 }</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>A response to getting several threads channels.</p>
-<p>Discord docs: defined <a href="https://discord.com/developers/docs/topics/threads#enumerating-threads">multiple times</a>:
-<a href="https://discord.com/developers/docs/resources/guild#list-active-guild-threads-response-body">1</a>,
-<a href="https://discord.com/developers/docs/resources/channel#list-private-archived-threads-response-body">2</a>,
-<a href="https://discord.com/developers/docs/resources/channel#list-public-archived-threads-response-body">3</a>,
-<a href="https://discord.com/developers/docs/resources/channel#list-private-archived-threads-response-body">4</a></p>
+<p>Discord docs: defined <a href="https://docs.discord.com/developers/topics/threads#enumerating-threads">multiple times</a>:
+<a href="https://docs.discord.com/developers/resources/guild#list-active-guild-threads-response-body">1</a>,
+<a href="https://docs.discord.com/developers/resources/channel#list-private-archived-threads-response-body">2</a>,
+<a href="https://docs.discord.com/developers/resources/channel#list-public-archived-threads-response-body">3</a>,
+<a href="https://docs.discord.com/developers/resources/channel#list-joined-private-archived-threads-response-body">4</a></p>
 </div></details><h2 id="fields" class="fields section-header">Fields (Non-exhaustive)<a href="#fields" class="anchor">§</a></h2><details class="toggle non-exhaustive"><summary class="hideme"><span>This struct is marked as non-exhaustive</span></summary><div class="docblock">Non-exhaustive structs could have additional fields added in future. Therefore, non-exhaustive structs cannot be constructed in external crates using the traditional <code>Struct { .. }</code> syntax; cannot be matched against without a wildcard <code>..</code>; and struct update syntax will not work.</div></details><span id="structfield.threads" class="structfield section-header"><a href="#structfield.threads" class="anchor field">§</a><code>threads: FixedArray&lt;<a class="struct" href="struct.GuildThread.html" title="struct serenity::model::channel::GuildThread">GuildThread</a>&gt;</code></span><div class="docblock"><p>The threads channels.</p>
 </div><span id="structfield.members" class="structfield section-header"><a href="#structfield.members" class="anchor field">§</a><code>members: FixedArray&lt;<a class="struct" href="struct.ThreadMember.html" title="struct serenity::model::channel::ThreadMember">ThreadMember</a>&gt;</code></span><div class="docblock"><p>A thread member for each returned thread the current user has joined.</p>
 </div><span id="structfield.has_more" class="structfield section-header"><a href="#structfield.has_more" class="anchor field">§</a><code>has_more: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code></span><div class="docblock"><p>Whether there are potentially more threads that could be returned on a subsequent call.</p>
