@@ -236,7 +236,7 @@
 <a href=#236 id=236 data-nosnippet>236</a>/// This identifier is special, it simply models internal IDs for type safety and therefore cannot
 <a href=#237 id=237 data-nosnippet>237</a>/// be deserialized
 <a href=#238 id=238 data-nosnippet>238</a></span><span class="attr">#[cfg_attr(feature = <span class="string">"typesize"</span>, derive(typesize::derive::TypeSize))]
-<a href=#239 id=239 data-nosnippet>239</a>#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord, Serialize)]
+<a href=#239 id=239 data-nosnippet>239</a>#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, PartialOrd, Ord, Deserialize, Serialize)]
 <a href=#240 id=240 data-nosnippet>240</a></span><span class="kw">pub struct </span>ShardId(<span class="kw">pub </span>u16);
 <a href=#241 id=241 data-nosnippet>241</a>
 <a href=#242 id=242 data-nosnippet>242</a><span class="kw">impl </span>ShardId {
