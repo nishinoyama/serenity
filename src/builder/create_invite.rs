@@ -192,8 +192,8 @@ impl<'a> CreateInvite<'a> {
     }
 
     /// The roles given to the users that accept this invite.
-    pub fn role_ids(mut self, role_ids: impl IntoIterator<Item = RoleId>) -> Self {
-        self.role_ids = role_ids.into_iter().collect();
+    pub fn role_ids(mut self, role_ids: impl IntoIterator<Item = impl Into<RoleId>>) -> Self {
+        self.role_ids = role_ids.into_iter().map(Into::into).collect();
         self
     }
 
