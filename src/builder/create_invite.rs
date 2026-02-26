@@ -42,6 +42,8 @@ pub struct CreateInvite<'a> {
     target_user_id: Option<UserId>,
     #[serde(skip_serializing_if = "Option::is_none")]
     target_application_id: Option<ApplicationId>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    role_ids: Option<&'a [RoleId]>,
 
     #[serde(skip)]
     audit_log_reason: Option<&'a str>,
@@ -186,6 +188,11 @@ impl<'a> CreateInvite<'a> {
     /// chess: `832012774040141894`
     pub fn target_application_id(mut self, target_application_id: ApplicationId) -> Self {
         self.target_application_id = Some(target_application_id);
+        self
+    }
+
+    pub fn role_ids(mut self, role_ids: &'a [RoleId]) -> Self {
+        self.role_ids = Some(role_ids);
         self
     }
 
