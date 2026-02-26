@@ -42,8 +42,8 @@ pub struct CreateInvite<'a> {
     target_user_id: Option<UserId>,
     #[serde(skip_serializing_if = "Option::is_none")]
     target_application_id: Option<ApplicationId>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    role_ids: Option<&'a [RoleId]>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    role_ids: Vec<RoleId>,
 
     #[serde(skip)]
     audit_log_reason: Option<&'a str>,
@@ -191,8 +191,9 @@ impl<'a> CreateInvite<'a> {
         self
     }
 
-    pub fn role_ids(mut self, role_ids: &'a [RoleId]) -> Self {
-        self.role_ids = Some(role_ids);
+    /// The roles given to the users that accept this invite.
+    pub fn role_ids(mut self, role_ids: impl IntoIterator<Item = RoleId>) -> Self {
+        self.role_ids = role_ids.into_iter().collect();
         self
     }
 
