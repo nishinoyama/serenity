@@ -9,7 +9,7 @@ use crate::model::prelude::*;
 /// A builder which edits the properties of a [`Member`], to be used in conjunction with
 /// [`Member::edit`].
 ///
-/// [Discord docs](https://discord.com/developers/docs/resources/guild#modify-guild-member)
+/// [Discord docs](https://docs.discord.com/developers/resources/guild#modify-guild-member)
 #[derive(Clone, Debug, Default, Serialize)]
 #[must_use]
 pub struct EditMember<'a> {
@@ -150,7 +150,7 @@ impl<'a> EditMember<'a> {
 
 #[cfg(feature = "http")]
 #[async_trait::async_trait]
-impl<'a> Builder for EditMember<'a> {
+impl Builder for EditMember<'_> {
     type Context<'ctx> = (GuildId, UserId);
     type Built = Member;
 

@@ -14,7 +14,7 @@ use crate::http::CacheHttp;
 use crate::internal::prelude::*;
 use crate::model::prelude::*;
 
-/// [Discord docs](https://discord.com/developers/docs/interactions/receiving-and-responding#edit-original-interaction-response)
+/// [Discord docs](https://docs.discord.com/developers/interactions/receiving-and-responding#edit-original-interaction-response)
 #[derive(Clone, Debug, Default, Serialize)]
 #[must_use]
 pub struct EditInteractionResponse(EditWebhookMessage);
@@ -75,6 +75,11 @@ impl EditInteractionResponse {
         Self(self.0.components(components))
     }
     super::button_and_select_menu_convenience_methods!(self.0.components);
+
+    /// Sets the flags for the message.
+    pub fn flags(self, flags: MessageFlags) -> Self {
+        Self(self.0.flags(flags))
+    }
 
     /// Sets attachments, see [`EditAttachments`] for more details.
     pub fn attachments(self, attachments: EditAttachments) -> Self {

@@ -9,7 +9,7 @@ use crate::model::prelude::*;
 
 /// A builder to edit a [`GuildChannel`] for use via [`GuildChannel::edit`].
 ///
-/// [Discord docs](https://discord.com/developers/docs/resources/channel#modify-channel-json-params-guild-channel).
+/// [Discord docs](https://docs.discord.com/developers/resources/channel#modify-channel-json-params-guild-channel).
 ///
 /// # Examples
 ///
@@ -138,6 +138,18 @@ impl<'a> EditChannel<'a> {
     /// [text]: ChannelType::Text
     pub fn topic(mut self, topic: impl Into<String>) -> Self {
         self.topic = Some(topic.into());
+        self
+    }
+
+    /// The status of the voice channel. Can be empty.
+    ///
+    /// Must be between 0 and 1024 characters long.
+    ///
+    /// This is for [voice] channels only.
+    ///
+    /// [voice]: ChannelType::Voice
+    pub fn status(mut self, status: impl Into<String>) -> Self {
+        self.status = Some(status.into());
         self
     }
 
@@ -293,7 +305,7 @@ impl<'a> EditChannel<'a> {
 
 #[cfg(feature = "http")]
 #[async_trait::async_trait]
-impl<'a> Builder for EditChannel<'a> {
+impl Builder for EditChannel<'_> {
     type Context<'ctx> = ChannelId;
     type Built = GuildChannel;
 
@@ -322,6 +334,24 @@ impl<'a> Builder for EditChannel<'a> {
                     crate::utils::user_has_perms_cache(cache, ctx, Permissions::MANAGE_ROLES)?;
                 }
             }
+        }
+
+        if let Some(status) = &self.status {
+            #[derive(Serialize)]
+            struct EditVoiceStatusBody<'a> {
+                status: &'a str,
+            }
+
+            cache_http
+                .http()
+                .edit_voice_status(
+                    ctx,
+                    &EditVoiceStatusBody {
+                        status: status.as_str(),
+                    },
+                    self.audit_log_reason,
+                )
+                .await?;
         }
 
         cache_http.http().edit_channel(ctx, &self, self.audit_log_reason).await

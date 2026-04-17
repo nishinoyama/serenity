@@ -70,6 +70,9 @@ struct PresenceUpdateMessage<'a> {
 enum WebSocketMessageData<'a> {
     Heartbeat(Option<u64>),
     ChunkGuild(ChunkGuildMessage<'a>),
+    SoundboardSounds {
+        guild_ids: &'a [GuildId],
+    },
     Identify {
         compress: bool,
         token: &'a str,
@@ -180,7 +183,9 @@ impl WsClient {
         Ok(())
     }
 
-    #[allow(clippy::missing_errors_doc)]
+    /// # Errors
+    ///
+    /// Errors if there is a problem with the WS connection.
     pub async fn send_chunk_guild(
         &mut self,
         guild_id: GuildId,
@@ -212,6 +217,28 @@ impl WsClient {
         .await
     }
 
+    /// # Errors
+    ///
+    /// Errors if there is a problem with the WS connection.
+    pub async fn request_soundboard_sounds(
+        &mut self,
+        guild_ids: &[GuildId],
+        shard_info: &ShardInfo,
+    ) -> Result<()> {
+        debug!("[{:?}] Requesting soundboard sounds", shard_info);
+
+        self.send_json(&WebSocketMessage {
+            op: Opcode::ReqeustSoundboardSounds,
+            d: WebSocketMessageData::SoundboardSounds {
+                guild_ids,
+            },
+        })
+        .await
+    }
+
+    /// # Errors
+    ///
+    /// Errors if there is a problem with the WS connection.
     #[instrument(skip(self))]
     pub async fn send_heartbeat(&mut self, shard_info: &ShardInfo, seq: Option<u64>) -> Result<()> {
         trace!("[{:?}] Sending heartbeat d: {:?}", shard_info, seq);
@@ -223,6 +250,9 @@ impl WsClient {
         .await
     }
 
+    /// # Errors
+    ///
+    /// Errors if there is a problem with the WS connection.
     #[instrument(skip(self, token))]
     pub async fn send_identify(
         &mut self,
@@ -261,6 +291,9 @@ impl WsClient {
         self.send_json(&msg).await
     }
 
+    /// # Errors
+    ///
+    /// Errors if there is a problem with the WS connection.
     #[instrument(skip(self))]
     pub async fn send_presence_update(
         &mut self,
@@ -284,6 +317,9 @@ impl WsClient {
         .await
     }
 
+    /// # Errors
+    ///
+    /// Errors if there is a problem with the WS connection.
     #[instrument(skip(self, token))]
     pub async fn send_resume(
         &mut self,

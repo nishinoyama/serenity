@@ -12,12 +12,12 @@ use crate::http::{CacheHttp, Http};
 use crate::internal::prelude::*;
 use crate::model::prelude::*;
 #[cfg(feature = "model")]
-use crate::model::utils::avatar_url;
+use crate::model::utils::{avatar_url, user_banner_url};
 
 /// Information about a member of a guild.
 ///
-/// [Discord docs](https://discord.com/developers/docs/resources/guild#guild-member-object),
-/// [extra fields](https://discord.com/developers/docs/topics/gateway-events#guild-member-add-guild-member-add-extra-fields).
+/// [Discord docs](https://docs.discord.com/developers/resources/guild#guild-member-object),
+/// [extra fields](https://docs.discord.com/developers/events/gateway-events#guild-member-add-guild-member-add-extra-fields).
 #[cfg_attr(feature = "typesize", derive(typesize::derive::TypeSize))]
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 #[non_exhaustive]
@@ -28,8 +28,10 @@ pub struct Member {
     ///
     /// Can't be longer than 32 characters.
     pub nick: Option<String>,
-    /// The guild avatar hash
+    /// The member's guild avatar hash
     pub avatar: Option<ImageHash>,
+    /// The member's guild banner hash
+    pub banner: Option<ImageHash>,
     /// Vector of Ids of [`Role`]s given to the member.
     pub roles: Vec<RoleId>,
     /// Timestamp representing the date when the member joined.
@@ -64,12 +66,14 @@ pub struct Member {
     ///
     /// Will be None or a time in the past if the user is not flagged.
     pub unusual_dm_activity_until: Option<Timestamp>,
+    /// Information about this member's guild specific avatar decoration.
+    pub avatar_decoration_data: Option<AvatarDecorationData>,
 }
 
 bitflags! {
     /// Flags for a guild member.
     ///
-    /// [Discord docs](https://discord.com/developers/docs/resources/guild#guild-member-object-guild-member-flags).
+    /// [Discord docs](https://docs.discord.com/developers/resources/guild#guild-member-object-guild-member-flags).
     #[cfg_attr(feature = "typesize", derive(typesize::derive::TypeSize))]
     #[derive(Copy, Clone, Default, Debug, Eq, Hash, PartialEq)]
     pub struct GuildMemberFlags: u32 {
@@ -81,6 +85,19 @@ bitflags! {
         const BYPASSES_VERIFICATION = 1 << 2;
         /// Member has started onboarding. Not editable
         const STARTED_ONBOARDING = 1 << 3;
+        /// Member is a guest and can only access the voice channel they were invited to. Not
+        /// editable
+        const IS_GUEST = 1 << 4;
+        /// Member has started Server Guide new member actions. Not editable
+        const STARTED_HOME_ACTIONS = 1 << 5;
+        /// Member has completed Server Guide new member actions. Not editable
+        const COMPLETED_HOME_ACTIONS = 1 << 6;
+        /// Member's username, display name, or nickname is blocked by AutoMod. Not editable
+        const AUTOMOD_QUARANTINED_USERNAME = 1 << 7;
+        /// Member has dismissed the DM settings upsell. Not editable
+        const DM_SETTINGS_UPSELL_ACKNOWLEDGED = 1 << 9;
+        /// Member's guild tag is blocked by AutoMod. Not editable
+        const AUTOMOD_QUARANTINED_GUILD_TAG = 1 << 10;
     }
 }
 
@@ -229,6 +246,7 @@ impl Member {
     /// Returns the DiscordTag of a Member, taking possible nickname into account.
     #[inline]
     #[must_use]
+    #[deprecated = "Use User::tag to get the correct Discord username format or Self::display_name for the name that users will see."]
     pub fn distinct(&self) -> String {
         if let Some(discriminator) = self.user.discriminator {
             format!("{}#{:04}", self.display_name(), discriminator.get())
@@ -416,6 +434,11 @@ impl Member {
     /// member.permissions(&cache).expect("permissions").bits());
     /// ```
     ///
+    /// # Note
+    ///
+    /// You likely want to use Guild::user_permissions_in instead as this function does not consider
+    /// permission overwrites.
+    ///
     /// # Errors
     ///
     /// Returns a [`ModelError::GuildNotFound`] if the guild the member's in could not be
@@ -424,8 +447,11 @@ impl Member {
     /// And/or returns [`ModelError::ItemMissing`] if the "default channel" of the guild is not
     /// found.
     #[cfg(feature = "cache")]
+    #[deprecated = "Use Guild::user_permissions_in, as this doesn't consider permission overwrites"]
     pub fn permissions(&self, cache: impl AsRef<Cache>) -> Result<Permissions> {
         let guild = cache.as_ref().guild(self.guild_id).ok_or(ModelError::GuildNotFound)?;
+
+        #[allow(deprecated)]
         Ok(guild.member_permissions(self))
     }
 
@@ -508,6 +534,14 @@ impl Member {
         avatar_url(Some(self.guild_id), self.user.id, self.avatar.as_ref())
     }
 
+    /// Returns the formatted URL of the member's per guild banner, if one exists.
+    ///
+    /// This will produce a WEBP image URL, or GIF if the member has a GIF avatar.
+    #[must_use]
+    pub fn banner_url(&self) -> Option<String> {
+        user_banner_url(Some(self.guild_id), self.user.id, self.banner.as_ref())
+    }
+
     /// Retrieves the URL to the current member's avatar, falling back to the user's avatar, then
     /// default avatar if needed.
     ///
@@ -540,13 +574,13 @@ impl fmt::Display for Member {
 ///
 /// This is used in [`Message`]s from [`Guild`]s.
 ///
-/// [Discord docs](https://discord.com/developers/docs/resources/guild#guild-member-object),
+/// [Discord docs](https://docs.discord.com/developers/resources/guild#guild-member-object),
 /// subset specification unknown (field type "partial member" is used in
-/// [link](https://discord.com/developers/docs/topics/gateway-events#message-create),
-/// [link](https://discord.com/developers/docs/resources/invite#invite-stage-instance-object),
-/// [link](https://discord.com/developers/docs/topics/gateway-events#message-create),
-/// [link](https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-resolved-data-structure),
-/// [link](https://discord.com/developers/docs/interactions/receiving-and-responding#message-interaction-object))
+/// [link](https://docs.discord.com/developers/events/gateway-events#message-create),
+/// [link](https://docs.discord.com/developers/resources/invite#invite-stage-instance-object),
+/// [link](https://docs.discord.com/developers/events/gateway-events#message-create),
+/// [link](https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-object-resolved-data-structure),
+/// [link](https://docs.discord.com/developers/interactions/receiving-and-responding#message-interaction-object))
 #[cfg_attr(feature = "typesize", derive(typesize::derive::TypeSize))]
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[non_exhaustive]
@@ -587,6 +621,12 @@ pub struct PartialMember {
     ///
     /// Will be None or a time in the past if the user is not flagged.
     pub unusual_dm_activity_until: Option<Timestamp>,
+    /// The member's guild avatar hash
+    pub avatar: Option<ImageHash>,
+    /// The member's guild banner hash
+    pub banner: Option<ImageHash>,
+    /// Information about this member's avatar decoration.
+    pub avatar_decoration_data: Option<AvatarDecorationData>,
 }
 
 impl From<PartialMember> for Member {
@@ -594,7 +634,8 @@ impl From<PartialMember> for Member {
         Member {
             user: partial.user.unwrap_or_default(),
             nick: partial.nick,
-            avatar: None,
+            avatar: partial.avatar,
+            banner: partial.banner,
             roles: partial.roles,
             joined_at: partial.joined_at,
             premium_since: partial.premium_since,
@@ -606,6 +647,7 @@ impl From<PartialMember> for Member {
             communication_disabled_until: None,
             guild_id: partial.guild_id.unwrap_or_default(),
             unusual_dm_activity_until: partial.unusual_dm_activity_until,
+            avatar_decoration_data: partial.avatar_decoration_data,
         }
     }
 }
@@ -624,6 +666,9 @@ impl From<Member> for PartialMember {
             user: Some(member.user),
             permissions: member.permissions,
             unusual_dm_activity_until: member.unusual_dm_activity_until,
+            avatar: member.avatar,
+            banner: member.banner,
+            avatar_decoration_data: member.avatar_decoration_data,
         }
     }
 }
@@ -638,8 +683,10 @@ pub struct PartialThreadMember {
     pub flags: ThreadMemberFlags,
 }
 
-/// [Discord docs](https://discord.com/developers/docs/resources/channel#thread-member-object),
-/// [extra fields](https://discord.com/developers/docs/topics/gateway-events#thread-member-update-thread-member-update-event-extra-fields).
+/// A model representing a user in a Guild Thread.
+///
+/// [Discord docs](https://docs.discord.com/developers/resources/channel#thread-member-object),
+/// [extra fields](https://docs.discord.com/developers/events/gateway-events#thread-member-update-thread-member-update-event-extra-fields).
 #[cfg_attr(feature = "typesize", derive(typesize::derive::TypeSize))]
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[non_exhaustive]
@@ -659,17 +706,17 @@ pub struct ThreadMember {
     ///
     /// Always present in [`ThreadMemberUpdateEvent`], otherwise `None`.
     pub guild_id: Option<GuildId>,
-    // According to https://discord.com/developers/docs/topics/gateway-events#thread-members-update,
+    // According to https://docs.discord.com/developers/events/gateway-events#thread-members-update,
     // > the thread member objects will also include the guild member and nullable presence objects
     // > for each added thread member
-    // Which implies that ThreadMember has a presence field. But https://discord.com/developers/docs/resources/channel#thread-member-object
+    // Which implies that ThreadMember has a presence field. But https://docs.discord.com/developers/resources/channel#thread-member-object
     // says that's not true. I'm not adding the presence field here for now
 }
 
 bitflags! {
     /// Describes extra features of the message.
     ///
-    /// Discord docs: flags field on [Thread Member](https://discord.com/developers/docs/resources/channel#thread-member-object).
+    /// Discord docs: flags field on [Thread Member](https://docs.discord.com/developers/resources/channel#thread-member-object).
     #[cfg_attr(feature = "typesize", derive(typesize::derive::TypeSize))]
     #[derive(Copy, Clone, Default, Debug, Eq, Hash, PartialEq)]
     pub struct ThreadMemberFlags: u64 {

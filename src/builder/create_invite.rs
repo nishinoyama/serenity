@@ -24,7 +24,7 @@ use crate::model::prelude::*;
 /// # }
 /// ```
 ///
-/// [Discord docs](https://discord.com/developers/docs/resources/channel#create-channel-invite)
+/// [Discord docs](https://docs.discord.com/developers/resources/channel#create-channel-invite)
 #[derive(Clone, Debug, Default, Serialize)]
 #[must_use]
 pub struct CreateInvite<'a> {
@@ -206,7 +206,7 @@ impl<'a> CreateInvite<'a> {
 
 #[cfg(feature = "http")]
 #[async_trait::async_trait]
-impl<'a> Builder for CreateInvite<'a> {
+impl Builder for CreateInvite<'_> {
     type Context<'ctx> = ChannelId;
     type Built = RichInvite;
 

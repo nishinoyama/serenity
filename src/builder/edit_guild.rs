@@ -9,7 +9,7 @@ use crate::model::prelude::*;
 
 /// A builder to optionally edit certain fields of a guild
 ///
-/// [Discord docs](https://discord.com/developers/docs/resources/guild#modify-guild).
+/// [Discord docs](https://docs.discord.com/developers/resources/guild#modify-guild).
 #[derive(Clone, Debug, Default, Serialize)]
 #[must_use]
 pub struct EditGuild<'a> {
@@ -314,7 +314,7 @@ impl<'a> EditGuild<'a> {
 
 #[cfg(feature = "http")]
 #[async_trait::async_trait]
-impl<'a> Builder for EditGuild<'a> {
+impl Builder for EditGuild<'_> {
     type Context<'ctx> = GuildId;
     type Built = PartialGuild;
 

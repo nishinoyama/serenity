@@ -7,7 +7,7 @@ use crate::http::CacheHttp;
 use crate::internal::prelude::*;
 use crate::model::prelude::*;
 
-/// [Discord docs](https://discord.com/developers/docs/resources/guild-scheduled-event#create-guild-scheduled-event)
+/// [Discord docs](https://docs.discord.com/developers/resources/guild-scheduled-event#create-guild-scheduled-event)
 #[derive(Clone, Debug, Serialize)]
 #[must_use]
 pub struct CreateScheduledEvent<'a> {
@@ -124,7 +124,7 @@ impl<'a> CreateScheduledEvent<'a> {
 
 #[cfg(feature = "http")]
 #[async_trait::async_trait]
-impl<'a> Builder for CreateScheduledEvent<'a> {
+impl Builder for CreateScheduledEvent<'_> {
     type Context<'ctx> = GuildId;
     type Built = ScheduledEvent;
 

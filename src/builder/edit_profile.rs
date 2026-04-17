@@ -11,7 +11,7 @@ use crate::model::user::CurrentUser;
 /// A builder to edit the current user's settings, to be used in conjunction with
 /// [`CurrentUser::edit`].
 ///
-/// [Discord docs](https://discord.com/developers/docs/resources/user#modify-current-user)
+/// [Discord docs](https://docs.discord.com/developers/resources/user#modify-current-user)
 #[derive(Clone, Debug, Default, Serialize)]
 #[must_use]
 pub struct EditProfile {
@@ -40,7 +40,7 @@ impl EditProfile {
     /// # use serenity::http::Http;
     /// #
     /// # #[cfg(feature = "http")]
-    /// # async fn _foo(http: &Http, current_user: &mut CurrentUser) -> Result<(), SerenityError> {
+    /// # async fn foo_(http: &Http, current_user: &mut CurrentUser) -> Result<(), SerenityError> {
     /// let avatar = CreateAttachment::path("./my_image.jpg").await.expect("Failed to read image.");
     /// current_user.edit(http, EditProfile::new().avatar(&avatar)).await?;
     /// # Ok(())

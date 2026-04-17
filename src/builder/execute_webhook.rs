@@ -55,7 +55,7 @@ use crate::model::prelude::*;
 /// # }
 /// ```
 ///
-/// [Discord docs](https://discord.com/developers/docs/resources/webhook#execute-webhook)
+/// [Discord docs](https://docs.discord.com/developers/resources/webhook#execute-webhook)
 #[derive(Clone, Debug, Default, Serialize)]
 #[must_use]
 pub struct ExecuteWebhook {
@@ -75,10 +75,14 @@ pub struct ExecuteWebhook {
     flags: Option<MessageFlags>,
     #[serde(skip_serializing_if = "Option::is_none")]
     thread_name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    applied_tags: Option<Vec<ForumTagId>>,
     attachments: EditAttachments,
 
     #[serde(skip)]
     thread_id: Option<ChannelId>,
+    #[serde(skip)]
+    with_components: Option<bool>,
 }
 
 impl ExecuteWebhook {
@@ -222,6 +226,9 @@ impl ExecuteWebhook {
     /// the webhook's `kind` field is set to [`WebhookType::Application`], or it was created by an
     /// application (and has kind [`WebhookType::Incoming`]).
     ///
+    /// If [`Self::with_components`] is set, non-interactive components can be used on non
+    /// application-owned webhooks.
+    ///
     /// [`WebhookType::Application`]: crate::model::webhook::WebhookType
     /// [`WebhookType::Incoming`]: crate::model::webhook::WebhookType
     pub fn components(mut self, components: Vec<CreateActionRow>) -> Self {
@@ -337,6 +344,18 @@ impl ExecuteWebhook {
         self.thread_name = Some(thread_name);
         self
     }
+
+    /// Tags for thread being created (requires the webhook channel to be a forum channel)
+    pub fn applied_tags(mut self, applied_tags: Vec<ForumTagId>) -> Self {
+        self.applied_tags = Some(applied_tags);
+        self
+    }
+
+    /// Allows sending non interactive components on non application owned webhooks.
+    pub fn with_components(mut self, with_components: bool) -> Self {
+        self.with_components = Some(with_components);
+        self
+    }
 }
 
 #[cfg(feature = "http")]
@@ -367,6 +386,11 @@ impl Builder for ExecuteWebhook {
             self.allowed_mentions.clone_from(&http.default_allowed_mentions);
         }
 
-        http.execute_webhook(ctx.0, self.thread_id, ctx.1, ctx.2, files, &self).await
+        if self.with_components.unwrap_or_default() {
+            http.execute_webhook_with_components(ctx.0, self.thread_id, ctx.1, ctx.2, files, &self)
+                .await
+        } else {
+            http.execute_webhook(ctx.0, self.thread_id, ctx.1, ctx.2, files, &self).await
+        }
     }
 }

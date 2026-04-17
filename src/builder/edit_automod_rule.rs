@@ -13,7 +13,7 @@ use crate::model::prelude::*;
 ///
 /// See [`GuildId::create_automod_rule`] for details.
 ///
-/// [Discord docs](https://discord.com/developers/docs/resources/auto-moderation#modify-auto-moderation-rule)
+/// [Discord docs](https://docs.discord.com/developers/resources/auto-moderation#modify-auto-moderation-rule)
 #[derive(Clone, Debug, Serialize)]
 #[must_use]
 pub struct EditAutoModRule<'a> {
@@ -99,7 +99,7 @@ impl<'a> EditAutoModRule<'a> {
     }
 }
 
-impl<'a> Default for EditAutoModRule<'a> {
+impl Default for EditAutoModRule<'_> {
     fn default() -> Self {
         Self {
             name: None,
@@ -116,7 +116,7 @@ impl<'a> Default for EditAutoModRule<'a> {
 
 #[cfg(feature = "http")]
 #[async_trait::async_trait]
-impl<'a> Builder for EditAutoModRule<'a> {
+impl Builder for EditAutoModRule<'_> {
     type Context<'ctx> = (GuildId, Option<RuleId>);
     type Built = Rule;
 

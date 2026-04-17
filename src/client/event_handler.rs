@@ -21,7 +21,7 @@ macro_rules! event_handler {
                 $( #[deprecated = $deprecated] )?
                 async fn $method_name(&self, $($context: Context,)? $( $arg_name: $arg_type ),*) {
                     // Suppress unused argument warnings
-                    drop(( $($context,)? $($arg_name),* ))
+                    drop(( $($context,)? $($arg_name,)* ))
                 }
             )*
         }
@@ -46,7 +46,7 @@ macro_rules! event_handler {
             ///
             /// ```rust,no_run
             /// # use serenity::client::{Context, FullEvent};
-            /// # fn _foo(ctx: Context, event: FullEvent) {
+            /// # fn foo_(ctx: Context, event: FullEvent) {
             /// if let FullEvent::Message { .. } = &event {
             ///     assert_eq!(event.snake_case_name(), "message");
             /// }
@@ -326,6 +326,23 @@ event_handler! {
     ///
     /// Provides the context of the shard and the event information about the update.
     ShardStageUpdate { event: ShardStageUpdateEvent } => async fn shard_stage_update(&self, ctx: Context);
+
+    /// Dispatched when the data for soundboard sounds is requested.
+    ///
+    /// Provides the guild's id and the data.
+    SoundboardSounds { event: SoundboardSoundsEvent } => async fn soundboard_sounds(&self, ctx: Context);
+
+    /// Dispatched when a soundboard sound is created.
+    SoundboardSoundCreate { event: SoundboardSoundCreateEvent } => async fn soundboard_sound_create(&self, ctx: Context);
+
+    /// Dispatched when a soundboard sound is updated.
+    SoundboardSoundUpdate { event: SoundboardSoundUpdateEvent } => async fn soundboard_sound_update(&self, ctx: Context);
+
+    /// Dispatched when multiple soundboard sounds at once are updated.
+    SoundboardSoundsUpdate { event: SoundboardSoundsUpdateEvent } => async fn soundboard_sounds_update(&self, ctx: Context);
+
+    /// Dispatched when a soundboard sound is deleted.
+    SoundboardSoundDelete { event: SoundboardSoundDeleteEvent } => async fn soundboard_sound_delete(&self, ctx: Context);
 
     /// Dispatched when a user starts typing.
     TypingStart { event: TypingStartEvent } => async fn typing_start(&self, ctx: Context);

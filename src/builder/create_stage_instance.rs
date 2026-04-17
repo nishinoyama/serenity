@@ -8,7 +8,7 @@ use crate::model::prelude::*;
 
 /// Builder for creating a stage instance
 ///
-/// [Discord docs](https://discord.com/developers/docs/resources/stage-instance#create-stage-instance)
+/// [Discord docs](https://docs.discord.com/developers/resources/stage-instance#create-stage-instance)
 #[derive(Clone, Debug, Serialize)]
 #[must_use]
 pub struct CreateStageInstance<'a> {
@@ -56,7 +56,7 @@ impl<'a> CreateStageInstance<'a> {
 
 #[cfg(feature = "http")]
 #[async_trait::async_trait]
-impl<'a> Builder for CreateStageInstance<'a> {
+impl Builder for CreateStageInstance<'_> {
     type Context<'ctx> = ChannelId;
     type Built = StageInstance;
 

@@ -27,7 +27,7 @@ enum_number! {
 
 /// An action row.
 ///
-/// [Discord docs](https://discord.com/developers/docs/interactions/message-components#action-rows).
+/// [Discord docs](https://docs.discord.com/developers/components/reference#action-row).
 #[cfg_attr(feature = "typesize", derive(typesize::derive::TypeSize))]
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[non_exhaustive]
@@ -42,7 +42,7 @@ pub struct ActionRow {
 
 /// A component which can be inside of an [`ActionRow`].
 ///
-/// [Discord docs](https://discord.com/developers/docs/interactions/message-components#component-object-component-types).
+/// [Discord docs](https://docs.discord.com/developers/components/reference#action-row-action-row-child-components).
 #[cfg_attr(feature = "typesize", derive(typesize::derive::TypeSize))]
 #[derive(Clone, Debug)]
 #[non_exhaustive]
@@ -105,6 +105,7 @@ impl From<SelectMenu> for ActionRowComponent {
 #[serde(untagged)]
 pub enum ButtonKind {
     Link { url: String },
+    Premium { sku_id: SkuId },
     NonLink { custom_id: String, style: ButtonStyle },
 }
 
@@ -120,6 +121,8 @@ impl Serialize for ButtonKind {
             url: Option<&'a str>,
             #[serde(skip_serializing_if = "Option::is_none")]
             custom_id: Option<&'a str>,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            sku_id: Option<SkuId>,
         }
 
         let helper = match self {
@@ -129,6 +132,15 @@ impl Serialize for ButtonKind {
                 style: 5,
                 url: Some(url),
                 custom_id: None,
+                sku_id: None,
+            },
+            ButtonKind::Premium {
+                sku_id,
+            } => Helper {
+                style: 6,
+                url: None,
+                custom_id: None,
+                sku_id: Some(*sku_id),
             },
             ButtonKind::NonLink {
                 custom_id,
@@ -137,6 +149,7 @@ impl Serialize for ButtonKind {
                 style: (*style).into(),
                 url: None,
                 custom_id: Some(custom_id),
+                sku_id: None,
             },
         };
         helper.serialize(serializer)
@@ -145,7 +158,7 @@ impl Serialize for ButtonKind {
 
 /// A button component.
 ///
-/// [Discord docs](https://discord.com/developers/docs/interactions/message-components#button-object-button-structure).
+/// [Discord docs](https://docs.discord.com/developers/components/reference#button-button-structure).
 #[cfg_attr(feature = "typesize", derive(typesize::derive::TypeSize))]
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[non_exhaustive]
@@ -185,7 +198,7 @@ enum_number! {
 
 /// A select menu component.
 ///
-/// [Discord docs](https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-menu-structure).
+/// Discord docs: [String Select](https://docs.discord.com/developers/components/reference#string-select), [User Select](https://docs.discord.com/developers/components/reference#user-select), [Role Select](https://docs.discord.com/developers/components/reference#role-select), [Mentionable Select](https://docs.discord.com/developers/components/reference#mentionable-select), [Channel Select](https://docs.discord.com/developers/components/reference#channel-select).
 #[cfg_attr(feature = "typesize", derive(typesize::derive::TypeSize))]
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[non_exhaustive]
@@ -218,7 +231,7 @@ pub struct SelectMenu {
 
 /// A select menu component options.
 ///
-/// [Discord docs](https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-option-structure).
+/// [Discord docs](https://docs.discord.com/developers/components/reference#string-select-select-option-structure)
 #[cfg_attr(feature = "typesize", derive(typesize::derive::TypeSize))]
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[non_exhaustive]
@@ -238,7 +251,7 @@ pub struct SelectMenuOption {
 
 /// An input text component for modal interactions
 ///
-/// [Discord docs](https://discord.com/developers/docs/interactions/message-components#text-inputs-text-input-structure).
+/// [Discord docs](https://docs.discord.com/developers/components/reference#text-input-text-input-structure).
 #[cfg_attr(feature = "typesize", derive(typesize::derive::TypeSize))]
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 #[non_exhaustive]
@@ -282,7 +295,7 @@ pub struct InputText {
 enum_number! {
     /// The style of the input text
     ///
-    /// [Discord docs](https://discord.com/developers/docs/interactions/message-components#text-inputs-text-input-styles).
+    /// [Discord docs](https://docs.discord.com/developers/components/reference#text-input-text-input-styles).
     #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Deserialize, Serialize)]
     #[cfg_attr(feature = "typesize", derive(typesize::derive::TypeSize))]
     #[serde(from = "u8", into = "u8")]
@@ -322,6 +335,14 @@ mod tests {
         assert_json(
             &button,
             json!({"type": 2, "style": 5, "url": "https://google.com", "label": "a", "disabled": false}),
+        );
+
+        button.data = ButtonKind::Premium {
+            sku_id: 1234965026943668316.into(),
+        };
+        assert_json(
+            &button,
+            json!({"type": 2, "style": 6, "sku_id": "1234965026943668316", "label": "a", "disabled": false}),
         );
     }
 }

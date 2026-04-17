@@ -24,7 +24,7 @@ use crate::internal::prelude::*;
 #[cfg(feature = "model")]
 use crate::json::json;
 #[cfg(feature = "model")]
-use crate::model::utils::avatar_url;
+use crate::model::utils::{avatar_url, user_banner_url};
 
 /// Used with `#[serde(with|deserialize_with|serialize_with)]`
 ///
@@ -58,7 +58,7 @@ pub(crate) mod discriminator {
 
     struct DiscriminatorVisitor;
 
-    impl<'de> Visitor<'de> for DiscriminatorVisitor {
+    impl Visitor<'_> for DiscriminatorVisitor {
         type Value = u16;
 
         fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -84,7 +84,7 @@ pub(crate) mod discriminator {
         deserializer.deserialize_option(OptionalDiscriminatorVisitor)
     }
 
-    #[allow(clippy::trivially_copy_pass_by_ref)]
+    #[allow(clippy::trivially_copy_pass_by_ref, clippy::ref_option)]
     pub fn serialize<S: Serializer>(
         value: &Option<NonZeroU16>,
         serializer: S,
@@ -123,7 +123,7 @@ pub(crate) mod discriminator {
 
 /// Information about the current user.
 ///
-/// [Discord docs](https://discord.com/developers/docs/resources/user#user-object).
+/// [Discord docs](https://docs.discord.com/developers/resources/user#user-object).
 #[cfg_attr(feature = "typesize", derive(typesize::derive::TypeSize))]
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 #[serde(transparent)]
@@ -187,7 +187,7 @@ impl CurrentUser {
 
 /// The representation of a user's status.
 ///
-/// [Discord docs](https://discord.com/developers/docs/topics/gateway-events#update-presence-status-types).
+/// [Discord docs](https://docs.discord.com/developers/events/gateway-events#update-presence-status-types).
 #[cfg_attr(feature = "typesize", derive(typesize::derive::TypeSize))]
 #[derive(
     Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Deserialize, Serialize,
@@ -222,8 +222,8 @@ impl OnlineStatus {
 
 /// Information about a user.
 ///
-/// [Discord docs](https://discord.com/developers/docs/resources/user#user-object), existence of
-/// additional partial member field documented [here](https://discord.com/developers/docs/topics/gateway-events#message-create).
+/// [Discord docs](https://docs.discord.com/developers/resources/user#user-object), existence of
+/// additional partial member field documented [here](https://docs.discord.com/developers/events/gateway-events#message-create).
 #[cfg_attr(feature = "typesize", derive(typesize::derive::TypeSize))]
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 #[non_exhaustive]
@@ -242,7 +242,6 @@ pub struct User {
     #[serde(default, skip_serializing_if = "Option::is_none", with = "discriminator")]
     pub discriminator: Option<NonZeroU16>,
     /// The account's display name, if it is set.
-    /// For bots this is the application name.
     pub global_name: Option<String>,
     /// Optional avatar hash.
     pub avatar: Option<ImageHash>,
@@ -286,16 +285,25 @@ pub struct User {
     pub public_flags: Option<UserPublicFlags>,
     /// Only included in [`Message::mentions`] for messages from the gateway.
     ///
-    /// [Discord docs](https://discord.com/developers/docs/topics/gateway-events#message-create-message-create-extra-fields).
+    /// [Discord docs](https://docs.discord.com/developers/events/gateway-events#message-create-message-create-extra-fields).
     // Box required to avoid infinitely recursive types
     pub member: Option<Box<PartialMember>>,
+    /// The primary guild and tag the user has active.
+    ///
+    /// Note: just because this guild is populated does not mean the tag is visible.
+    pub primary_guild: Option<PrimaryGuild>,
+    /// Information about this user's avatar decoration.
+    pub avatar_decoration_data: Option<AvatarDecorationData>,
+    /// The collectibles the user currently has active, excluding avatar decorations and profile
+    /// effects.
+    pub collectibles: Option<Collectibles>,
 }
 
 enum_number! {
     /// Premium types denote the level of premium a user has. Visit the [Nitro](https://discord.com/nitro)
     /// page to learn more about the premium plans Discord currently offers.
     ///
-    /// [Discord docs](https://discord.com/developers/docs/resources/user#user-object-premium-types).
+    /// [Discord docs](https://docs.discord.com/developers/resources/user#user-object-premium-types).
     #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, Deserialize, Serialize)]
     #[cfg_attr(feature = "typesize", derive(typesize::derive::TypeSize))]
     #[serde(from = "u8", into = "u8")]
@@ -313,7 +321,7 @@ enum_number! {
 bitflags! {
     /// User's public flags
     ///
-    /// [Discord docs](https://discord.com/developers/docs/resources/user#user-object-user-flags).
+    /// [Discord docs](https://docs.discord.com/developers/resources/user#user-object-user-flags).
     #[cfg_attr(feature = "typesize", derive(typesize::derive::TypeSize))]
     #[derive(Copy, Clone, Default, Debug, Eq, Hash, PartialEq)]
     pub struct UserPublicFlags: u32 {
@@ -355,6 +363,99 @@ bitflags! {
     }
 }
 
+/// User's Primary Guild object
+///
+/// [Discord docs](https://docs.discord.com/developers/resources/user#user-object-user-primary-guild)
+#[cfg_attr(feature = "typesize", derive(typesize::derive::TypeSize))]
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[non_exhaustive]
+pub struct PrimaryGuild {
+    /// The id of the user's primary guild.
+    pub identity_guild_id: Option<GuildId>,
+    /// Whether the user is displaying the primary guild's server tag. This can be null if the
+    /// system clears the identity, e.g. because the server no longer supports tags.
+    pub identity_enabled: Option<bool>,
+    /// The text of the [`User`]'s server tag.
+    pub tag: Option<String>,
+    /// The hash of the server badge.
+    pub badge: Option<ImageHash>,
+}
+
+#[cfg(feature = "model")]
+impl PrimaryGuild {
+    #[must_use]
+    /// Returns the formatted URL of the badge's icon, if one exists.
+    pub fn badge_url(&self) -> Option<String> {
+        primary_guild_badge_url(self.identity_guild_id, self.badge.as_ref())
+    }
+}
+
+#[cfg_attr(feature = "typesize", derive(typesize::derive::TypeSize))]
+#[derive(Clone, Copy, Debug, Deserialize, Serialize)]
+#[non_exhaustive]
+/// The data for a [`User`]'s avatar decoration.
+///
+/// [Discord docs](https://docs.discord.com/developers/resources/user#avatar-decoration-data-object).
+pub struct AvatarDecorationData {
+    /// The avatar decoration hash
+    pub asset: ImageHash,
+    /// id of the avatar decoration's SKU
+    pub sku_id: SkuId,
+}
+
+#[cfg(feature = "model")]
+impl AvatarDecorationData {
+    #[must_use]
+    /// Returns the formatted URL of the decoration.
+    pub fn decoration_url(&self) -> String {
+        avatar_decoration_url(&self.asset)
+    }
+}
+
+/// The collectibles the user has, excluding Avatar Decorations and Profile Effects.
+///
+/// [Discord docs](https://docs.discord.com/developers/resources/user#collectibles).
+#[cfg_attr(feature = "typesize", derive(typesize::derive::TypeSize))]
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[non_exhaustive]
+pub struct Collectibles {
+    /// The [`User`]'s nameplate, if they have one.
+    pub nameplate: Option<Nameplate>,
+}
+
+/// A nameplate, shown on the member list on official clients.
+///
+/// [Discord docs](https://docs.discord.com/developers/resources/user#nameplate-nameplate-structure).
+#[cfg_attr(feature = "typesize", derive(typesize::derive::TypeSize))]
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[non_exhaustive]
+pub struct Nameplate {
+    /// Id of the nameplate SKU
+    pub sku_id: SkuId,
+    /// Path to the nameplate asset.
+    pub asset: String,
+    /// The label of this nameplate.
+    pub label: String,
+    /// Background color of the nameplate, one of: `crimson`, `berry`, `sky`, `teal`, `forest`,
+    /// `bubble_gum`, `violet`, `cobalt`, `clover`, `lemon`, `white`
+    pub palette: String,
+}
+
+#[cfg(all(feature = "unstable_discord_api", feature = "model"))]
+impl Nameplate {
+    /// Gets the static version of the nameplate's url.
+    #[must_use]
+    pub fn static_url(&self) -> String {
+        static_nameplate_url(&self.asset)
+    }
+
+    /// Gets the animated version of the nameplate's url.
+    #[must_use]
+    pub fn url(&self) -> String {
+        nameplate_url(&self.asset)
+    }
+}
+
 use std::hash::{Hash, Hasher};
 
 impl PartialEq for User {
@@ -385,13 +486,10 @@ impl User {
     /// Returns the formatted URL of the user's banner, if one exists.
     ///
     /// This will produce a WEBP image URL, or GIF if the user has a GIF banner.
-    ///
-    /// **Note**: This will only be present if the user is fetched via Rest API, e.g. with
-    /// [`crate::http::Http::get_user`].
     #[inline]
     #[must_use]
     pub fn banner_url(&self) -> Option<String> {
-        banner_url(self.id, self.banner.as_ref())
+        user_banner_url(None, self.id, self.banner.as_ref())
     }
 
     /// Creates a direct message channel between the [current user] and the user. This can also
@@ -443,6 +541,17 @@ impl User {
         builder: CreateMessage,
     ) -> Result<Message> {
         self.id.direct_message(cache_http, builder).await
+    }
+
+    /// Calculates the user's display name.
+    ///
+    /// The global name takes priority over the user's username if it exists.
+    ///
+    /// Note: Guild specific information is not included as this is only available on the [Member].
+    #[inline]
+    #[must_use]
+    pub fn display_name(&self) -> &str {
+        self.global_name.as_deref().unwrap_or(&self.name)
     }
 
     /// This is an alias of [`Self::direct_message`].
@@ -765,7 +874,7 @@ impl From<Member> for UserId {
     }
 }
 
-impl<'a> From<&'a Member> for UserId {
+impl From<&Member> for UserId {
     /// Gets the Id of a [`Member`].
     fn from(member: &Member) -> UserId {
         member.user.id
@@ -779,7 +888,7 @@ impl From<User> for UserId {
     }
 }
 
-impl<'a> From<&'a User> for UserId {
+impl From<&User> for UserId {
     /// Gets the Id of a [`User`].
     fn from(user: &User) -> UserId {
         user.id
@@ -803,14 +912,6 @@ fn static_avatar_url(user_id: UserId, hash: Option<&ImageHash>) -> Option<String
 }
 
 #[cfg(feature = "model")]
-fn banner_url(user_id: UserId, hash: Option<&ImageHash>) -> Option<String> {
-    hash.map(|hash| {
-        let ext = if hash.is_animated() { "gif" } else { "webp" };
-        cdn!("/banners/{}/{}.{}?size=1024", user_id, hash, ext)
-    })
-}
-
-#[cfg(feature = "model")]
 fn tag(name: &str, discriminator: Option<NonZeroU16>) -> String {
     // 32: max length of username
     // 1: `#`
@@ -819,9 +920,34 @@ fn tag(name: &str, discriminator: Option<NonZeroU16>) -> String {
     tag.push_str(name);
     if let Some(discriminator) = discriminator {
         tag.push('#');
-        write!(tag, "{discriminator:04}").unwrap();
+        write!(tag, "{discriminator:04}").expect("writing to a string should never fail");
     }
     tag
+}
+
+#[cfg(feature = "model")]
+fn primary_guild_badge_url(guild_id: Option<GuildId>, hash: Option<&ImageHash>) -> Option<String> {
+    if let Some(guild_id) = guild_id {
+        return hash.map(|hash| cdn!("/guild-tag-badges/{}/{}.png?size=1024", guild_id, hash));
+    }
+
+    None
+}
+
+#[cfg(feature = "model")]
+fn avatar_decoration_url(hash: &ImageHash) -> String {
+    cdn!("/avatar-decoration-presets/{}.png?size=1024", hash)
+}
+
+#[cfg(all(feature = "unstable_discord_api", feature = "model"))]
+fn nameplate_url(path: &str) -> String {
+    cdn!("https://cdn.discordapp.com/assets/collectibles/{}/asset.webm", path)
+}
+
+#[cfg(all(feature = "unstable_discord_api", feature = "model"))]
+#[cfg(feature = "model")]
+fn static_nameplate_url(path: &str) -> String {
+    cdn!("https://cdn.discordapp.com/assets/collectibles/{}/static.png", path)
 }
 
 #[cfg(test)]

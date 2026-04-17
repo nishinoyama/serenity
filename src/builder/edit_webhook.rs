@@ -7,7 +7,7 @@ use crate::http::CacheHttp;
 use crate::internal::prelude::*;
 use crate::model::prelude::*;
 
-/// [Discord docs](https://discord.com/developers/docs/resources/webhook#modify-webhook)
+/// [Discord docs](https://docs.discord.com/developers/resources/webhook#modify-webhook)
 #[derive(Debug, Default, Clone, Serialize)]
 #[must_use]
 pub struct EditWebhook<'a> {
@@ -63,7 +63,7 @@ impl<'a> EditWebhook<'a> {
 
 #[cfg(feature = "http")]
 #[async_trait::async_trait]
-impl<'a> Builder for EditWebhook<'a> {
+impl Builder for EditWebhook<'_> {
     type Context<'ctx> = (WebhookId, Option<&'ctx str>);
     type Built = Webhook;
 

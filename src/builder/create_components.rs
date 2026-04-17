@@ -1,11 +1,10 @@
 use serde::Serialize;
 
-use crate::json::{self, json};
 use crate::model::prelude::*;
 
 /// A builder for creating a components action row in a message.
 ///
-/// [Discord docs](https://discord.com/developers/docs/interactions/message-components#component-object).
+/// [Discord docs](https://docs.discord.com/developers/components/reference#action-row).
 #[derive(Clone, Debug, PartialEq)]
 #[must_use]
 pub enum CreateActionRow {
@@ -17,17 +16,18 @@ pub enum CreateActionRow {
 
 impl serde::Serialize for CreateActionRow {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        use serde::ser::Error as _;
+        use serde::ser::SerializeMap as _;
 
-        json!({
-            "type": 1,
-            "components": match self {
-                Self::Buttons(x) => json::to_value(x).map_err(S::Error::custom)?,
-                Self::SelectMenu(x) => json::to_value(vec![x]).map_err(S::Error::custom)?,
-                Self::InputText(x) => json::to_value(vec![x]).map_err(S::Error::custom)?,
-            }
-        })
-        .serialize(serializer)
+        let mut map = serializer.serialize_map(Some(2))?;
+        map.serialize_entry("type", &1_u8)?;
+
+        match self {
+            CreateActionRow::Buttons(buttons) => map.serialize_entry("components", &buttons)?,
+            CreateActionRow::SelectMenu(select) => map.serialize_entry("components", &[select])?,
+            CreateActionRow::InputText(input) => map.serialize_entry("components", &[input])?,
+        }
+
+        map.end()
     }
 }
 
@@ -53,6 +53,21 @@ impl CreateButton {
         })
     }
 
+    /// Creates a new premium button associated with the given SKU.
+    ///
+    /// Clicking this button _will not_ trigger an interaction event in your bot.
+    pub fn new_premium(sku_id: impl Into<SkuId>) -> Self {
+        Self(Button {
+            kind: ComponentType::Button,
+            data: ButtonKind::Premium {
+                sku_id: sku_id.into(),
+            },
+            label: None,
+            emoji: None,
+            disabled: false,
+        })
+    }
+
     /// Creates a normal button with the given custom ID. You must also set [`Self::label`] and/or
     /// [`Self::emoji`] after this.
     pub fn new(custom_id: impl Into<String>) -> Self {
@@ -71,7 +86,7 @@ impl CreateButton {
     /// Sets the custom id of the button, a developer-defined identifier. Replaces the current
     /// value as set in [`Self::new`].
     ///
-    /// Has no effect on link buttons.
+    /// Has no effect on link buttons and premium buttons.
     pub fn custom_id(mut self, id: impl Into<String>) -> Self {
         if let ButtonKind::NonLink {
             custom_id, ..
@@ -84,7 +99,7 @@ impl CreateButton {
 
     /// Sets the style of this button.
     ///
-    /// Has no effect on link buttons.
+    /// Has no effect on link buttons and premium buttons.
     pub fn style(mut self, new_style: ButtonStyle) -> Self {
         if let ButtonKind::NonLink {
             style, ..
@@ -114,20 +129,32 @@ impl CreateButton {
     }
 }
 
+impl From<Button> for CreateButton {
+    fn from(button: Button) -> Self {
+        Self(button)
+    }
+}
+
 struct CreateSelectMenuDefault(Mention);
 
 impl Serialize for CreateSelectMenuDefault {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        use serde::ser::SerializeMap as _;
+
         let (id, kind) = match self.0 {
             Mention::Channel(c) => (c.get(), "channel"),
             Mention::Role(r) => (r.get(), "role"),
             Mention::User(u) => (u.get(), "user"),
         };
-        json!({"id": id, "type": kind}).serialize(serializer)
+
+        let mut map = serializer.serialize_map(Some(2))?;
+        map.serialize_entry("id", &id)?;
+        map.serialize_entry("type", kind)?;
+        map.end()
     }
 }
 
-/// [Discord docs](https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-menu-structure).
+/// Discord docs: [String Select](https://docs.discord.com/developers/components/reference#string-select), [User Select](https://docs.discord.com/developers/components/reference#user-select), [Role Select](https://docs.discord.com/developers/components/reference#role-select), [Mentionable Select](https://docs.discord.com/developers/components/reference#mentionable-select), [Channel Select](https://docs.discord.com/developers/components/reference#channel-select).
 #[derive(Clone, Debug, PartialEq)]
 pub enum CreateSelectMenuKind {
     String { options: Vec<CreateSelectMenuOption> },
@@ -151,6 +178,7 @@ impl Serialize for CreateSelectMenuKind {
             default_values: Vec<CreateSelectMenuDefault>,
         }
 
+        #[allow(clippy::ref_option)]
         fn map<I: Into<Mention> + Copy>(
             values: &Option<Vec<I>>,
         ) -> impl Iterator<Item = CreateSelectMenuDefault> + '_ {
@@ -197,7 +225,7 @@ impl Serialize for CreateSelectMenuKind {
 
 /// A builder for creating a select menu component in a message
 ///
-/// [Discord docs](https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-menu-structure).
+/// [Discord docs](https://docs.discord.com/developers/components/reference#component-object).
 #[derive(Clone, Debug, Serialize, PartialEq)]
 #[must_use]
 pub struct CreateSelectMenu {
@@ -263,7 +291,7 @@ impl CreateSelectMenu {
 
 /// A builder for creating an option of a select menu component in a message
 ///
-/// [Discord docs](https://discord.com/developers/docs/interactions/message-components#select-menu-object-select-option-structure)
+/// [Discord docs](https://docs.discord.com/developers/components/reference#string-select-select-option-structure)
 #[derive(Clone, Debug, Serialize, PartialEq)]
 #[must_use]
 pub struct CreateSelectMenuOption {
@@ -323,7 +351,7 @@ impl CreateSelectMenuOption {
 
 /// A builder for creating an input text component in a modal
 ///
-/// [Discord docs](https://discord.com/developers/docs/interactions/message-components#text-inputs-text-input-structure).
+/// [Discord docs](https://docs.discord.com/developers/components/reference#text-input-text-input-structure).
 #[derive(Clone, Debug, Serialize, PartialEq)]
 #[must_use]
 pub struct CreateInputText(InputText);

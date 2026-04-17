@@ -8,7 +8,7 @@ use crate::model::prelude::*;
 
 /// A builder to specify the fields to edit in a [`GuildWidget`].
 ///
-/// [Discord docs](https://discord.com/developers/docs/resources/guild#modify-guild-widget)
+/// [Discord docs](https://docs.discord.com/developers/resources/guild#modify-guild-widget)
 #[derive(Clone, Debug, Default, Serialize)]
 #[must_use]
 pub struct EditGuildWidget<'a> {
@@ -48,7 +48,7 @@ impl<'a> EditGuildWidget<'a> {
 
 #[cfg(feature = "http")]
 #[async_trait::async_trait]
-impl<'a> Builder for EditGuildWidget<'a> {
+impl Builder for EditGuildWidget<'_> {
     type Context<'ctx> = GuildId;
     type Built = GuildWidget;
 

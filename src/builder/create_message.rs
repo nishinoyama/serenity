@@ -50,7 +50,7 @@ use crate::model::prelude::*;
 /// # }
 /// ```
 ///
-/// [Discord docs](https://discord.com/developers/docs/resources/channel#create-message)
+/// [Discord docs](https://docs.discord.com/developers/resources/message#create-message)
 #[derive(Clone, Debug, Default, Serialize)]
 #[must_use]
 pub struct CreateMessage {
@@ -208,7 +208,7 @@ impl CreateMessage {
         self
     }
 
-    /// Set the reference message this message is a reply to.
+    /// Set the message this reply or forward is referring to.
     pub fn reference_message(mut self, reference: impl Into<MessageReference>) -> Self {
         self.message_reference = Some(reference.into());
         self

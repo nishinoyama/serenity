@@ -17,7 +17,7 @@ use crate::model::prelude::*;
 
 /// A builder to specify the fields to edit in an existing [`Webhook`]'s message.
 ///
-/// [Discord docs](https://discord.com/developers/docs/resources/webhook#edit-webhook-message)
+/// [Discord docs](https://docs.discord.com/developers/resources/webhook#edit-webhook-message)
 #[derive(Clone, Debug, Default, Serialize)]
 #[must_use]
 pub struct EditWebhookMessage {
@@ -25,6 +25,8 @@ pub struct EditWebhookMessage {
     content: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     embeds: Option<Vec<CreateEmbed>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    flags: Option<MessageFlags>,
     #[serde(skip_serializing_if = "Option::is_none")]
     allowed_mentions: Option<CreateAllowedMentions>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -130,6 +132,12 @@ impl EditWebhookMessage {
         self
     }
     super::button_and_select_menu_convenience_methods!(self.components);
+
+    /// Sets the flags for the message.
+    pub fn flags(mut self, flags: MessageFlags) -> Self {
+        self.flags = Some(flags);
+        self
+    }
 
     /// Sets attachments, see [`EditAttachments`] for more details.
     pub fn attachments(mut self, attachments: EditAttachments) -> Self {

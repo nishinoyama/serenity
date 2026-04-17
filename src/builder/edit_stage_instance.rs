@@ -8,7 +8,7 @@ use crate::model::prelude::*;
 
 /// Edits a [`StageInstance`].
 ///
-/// [Discord docs](https://discord.com/developers/docs/resources/stage-instance#modify-stage-instance)
+/// [Discord docs](https://docs.discord.com/developers/resources/stage-instance#modify-stage-instance)
 #[derive(Clone, Debug, Default, Serialize)]
 #[must_use]
 pub struct EditStageInstance<'a> {
@@ -48,7 +48,7 @@ impl<'a> EditStageInstance<'a> {
 
 #[cfg(feature = "http")]
 #[async_trait::async_trait]
-impl<'a> Builder for EditStageInstance<'a> {
+impl Builder for EditStageInstance<'_> {
     type Context<'ctx> = ChannelId;
     type Built = StageInstance;
 

@@ -1,5 +1,5 @@
 use serde::de::Error as DeError;
-use serde::ser::{Error as _, Serialize};
+use serde::ser::{Serialize, SerializeMap as _};
 
 #[cfg(feature = "model")]
 use crate::builder::{
@@ -14,14 +14,14 @@ use crate::client::Context;
 #[cfg(feature = "model")]
 use crate::http::{CacheHttp, Http};
 use crate::internal::prelude::*;
-use crate::json::{self, json};
+use crate::json;
 use crate::model::prelude::*;
 #[cfg(all(feature = "collector", feature = "utils"))]
 use crate::utils::{CreateQuickModal, QuickModalResponse};
 
 /// An interaction triggered by a message component.
 ///
-/// [Discord docs](https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-interaction-structure).
+/// [Discord docs](https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-object-interaction-structure).
 #[cfg_attr(feature = "typesize", derive(typesize::derive::TypeSize))]
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(remote = "Self")]
@@ -64,11 +64,11 @@ pub struct ComponentInteraction {
     pub entitlements: Vec<Entitlement>,
     /// The owners of the applications that authorized the interaction, such as a guild or user.
     #[serde(default)]
-    #[cfg(feature = "unstable_discord_api")]
     pub authorizing_integration_owners: AuthorizingIntegrationOwners,
     /// The context where the interaction was triggered from.
-    #[cfg(feature = "unstable_discord_api")]
     pub context: Option<InteractionContext>,
+    /// Attachment size limit in bytes.
+    pub attachment_size_limit: u32,
 }
 
 #[cfg(feature = "model")]
@@ -307,33 +307,35 @@ impl<'de> Deserialize<'de> for ComponentInteractionDataKind {
 }
 
 impl Serialize for ComponentInteractionDataKind {
+    #[rustfmt::skip] // Remove this for horror.
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> StdResult<S::Ok, S::Error> {
-        json!({
-            "component_type": match self {
-                Self::Button { .. } => 2,
-                Self::StringSelect { .. } => 3,
-                Self::UserSelect { .. } => 5,
-                Self::RoleSelect { .. } => 6,
-                Self::MentionableSelect { .. } => 7,
-                Self::ChannelSelect { .. } => 8,
-                Self::Unknown(x) => *x,
-            },
-            "values": match self {
-                Self::StringSelect { values } => json::to_value(values).map_err(S::Error::custom)?,
-                Self::UserSelect { values } => json::to_value(values).map_err(S::Error::custom)?,
-                Self::RoleSelect { values } => json::to_value(values).map_err(S::Error::custom)?,
-                Self::MentionableSelect { values } => json::to_value(values).map_err(S::Error::custom)?,
-                Self::ChannelSelect { values } => json::to_value(values).map_err(S::Error::custom)?,
-                Self::Button | Self::Unknown(_) => json::NULL,
-            },
-        })
-        .serialize(serializer)
+        let mut map = serializer.serialize_map(Some(2))?;
+        map.serialize_entry("component_type", &match self {
+            Self::Button { .. } => 2,
+            Self::StringSelect { .. } => 3,
+            Self::UserSelect { .. } => 5,
+            Self::RoleSelect { .. } => 6,
+            Self::MentionableSelect { .. } => 7,
+            Self::ChannelSelect { .. } => 8,
+            Self::Unknown(x) => *x,
+        })?;
+
+        match self {
+            Self::StringSelect { values } => map.serialize_entry("values", values)?,
+            Self::UserSelect { values } => map.serialize_entry("values", values)?,
+            Self::RoleSelect { values } => map.serialize_entry("values", values)?,
+            Self::MentionableSelect { values } => map.serialize_entry("values", values)?,
+            Self::ChannelSelect { values } => map.serialize_entry("values", values)?,
+            Self::Button | Self::Unknown(_) => map.serialize_entry("values", &None::<()>)?,
+        }
+
+        map.end()
     }
 }
 
 /// A message component interaction data, provided by [`ComponentInteraction::data`]
 ///
-/// [Discord docs](https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-object-message-component-data-structure).
+/// [Discord docs](https://docs.discord.com/developers/components/reference#anatomy-of-a-component).
 #[cfg_attr(feature = "typesize", derive(typesize::derive::TypeSize))]
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[non_exhaustive]
@@ -343,4 +345,7 @@ pub struct ComponentInteractionData {
     /// Type and type-specific data of this component interaction.
     #[serde(flatten)]
     pub kind: ComponentInteractionDataKind,
+    /// The parameters and the given values. The converted objects from the given options.
+    #[serde(default)]
+    pub resolved: CommandDataResolved,
 }

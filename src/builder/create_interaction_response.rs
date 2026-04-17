@@ -1,3 +1,4 @@
+use super::create_poll::Ready;
 #[cfg(feature = "http")]
 use super::{check_overflow, Builder};
 use super::{
@@ -5,6 +6,7 @@ use super::{
     CreateAllowedMentions,
     CreateAttachment,
     CreateEmbed,
+    CreatePoll,
     EditAttachments,
 };
 #[cfg(feature = "http")]
@@ -12,10 +14,9 @@ use crate::constants;
 #[cfg(feature = "http")]
 use crate::http::CacheHttp;
 use crate::internal::prelude::*;
-use crate::json::{self, json};
 use crate::model::prelude::*;
 
-/// [Discord docs](https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object).
+/// [Discord docs](https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-response-object).
 #[derive(Clone, Debug)]
 pub enum CreateInteractionResponse {
     /// Acknowledges a Ping (only required when your bot uses an HTTP endpoint URL).
@@ -63,37 +64,47 @@ pub enum CreateInteractionResponse {
     /// Responds to the interaction with an upgrade button.
     ///
     /// Corresponds to Discord's `PREMIUM_REQUIRED'.
+    #[deprecated = "use premium button components via `CreateButton::new_premium` instead"]
     PremiumRequired,
+    /// Not valid for autocomplete and Ping interactions. Only available for applications with
+    /// Activities enabled.
+    ///
+    /// Responds to the interaction by launching the Activity associated with the app.
+    ///
+    /// Corresponds to Discord's `LAUNCH_ACTIVITY`.
+    LaunchActivity,
 }
 
 impl serde::Serialize for CreateInteractionResponse {
+    #[allow(deprecated)] // We have to cover deprecated variants
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> StdResult<S::Ok, S::Error> {
-        use serde::ser::Error as _;
+        use serde::ser::SerializeMap as _;
 
-        #[allow(clippy::match_same_arms)] // hurts readability
-        json!({
-            "type": match self {
-                Self::Pong => 1,
-                Self::Message(_) => 4,
-                Self::Defer(_) => 5,
-                Self::Acknowledge => 6,
-                Self::UpdateMessage(_) => 7,
-                Self::Autocomplete(_) => 8,
-                Self::Modal(_) => 9,
-                Self::PremiumRequired => 10,
+        let mut map = serializer.serialize_map(Some(2))?;
+        map.serialize_entry("type", &match self {
+            Self::Pong => 1,
+            Self::Message(_) => 4,
+            Self::Defer(_) => 5,
+            Self::Acknowledge => 6,
+            Self::UpdateMessage(_) => 7,
+            Self::Autocomplete(_) => 8,
+            Self::Modal(_) => 9,
+            Self::PremiumRequired => 10,
+            Self::LaunchActivity => 12,
+        })?;
+
+        match self {
+            Self::Autocomplete(x) => map.serialize_entry("data", &x)?,
+            Self::Modal(x) => map.serialize_entry("data", &x)?,
+            Self::Message(x) | Self::Defer(x) | Self::UpdateMessage(x) => {
+                map.serialize_entry("data", &x)?;
             },
-            "data": match self {
-                Self::Pong => json::NULL,
-                Self::Message(x) => json::to_value(x).map_err(S::Error::custom)?,
-                Self::Defer(x) => json::to_value(x).map_err(S::Error::custom)?,
-                Self::Acknowledge => json::NULL,
-                Self::UpdateMessage(x) => json::to_value(x).map_err(S::Error::custom)?,
-                Self::Autocomplete(x) => json::to_value(x).map_err(S::Error::custom)?,
-                Self::Modal(x) => json::to_value(x).map_err(S::Error::custom)?,
-                Self::PremiumRequired => json::NULL,
-            }
-        })
-        .serialize(serializer)
+            Self::Pong | Self::Acknowledge | Self::PremiumRequired | Self::LaunchActivity => {
+                map.serialize_entry("data", &None::<()>)?;
+            },
+        }
+
+        map.end()
     }
 }
 
@@ -156,13 +167,13 @@ impl Builder for CreateInteractionResponse {
             if msg.allowed_mentions.is_none() {
                 msg.allowed_mentions.clone_from(&http.default_allowed_mentions);
             }
-        };
+        }
 
         http.create_interaction_response(ctx.0, ctx.1, &self, files).await
     }
 }
 
-/// [Discord docs](https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-messages).
+/// [Discord docs](https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-response-object-messages).
 #[derive(Clone, Debug, Default, Serialize)]
 #[must_use]
 pub struct CreateInteractionResponseMessage {
@@ -178,6 +189,8 @@ pub struct CreateInteractionResponseMessage {
     flags: Option<InteractionResponseFlags>,
     #[serde(skip_serializing_if = "Option::is_none")]
     components: Option<Vec<CreateActionRow>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    poll: Option<CreatePoll<Ready>>,
     attachments: EditAttachments,
 }
 
@@ -282,7 +295,7 @@ impl CreateInteractionResponseMessage {
             flags |= InteractionResponseFlags::EPHEMERAL;
         } else {
             flags &= !InteractionResponseFlags::EPHEMERAL;
-        };
+        }
 
         self.flags = Some(flags);
         self
@@ -293,11 +306,20 @@ impl CreateInteractionResponseMessage {
         self.components = Some(components);
         self
     }
+
+    /// Adds a poll to the message. Only one poll can be added per message.
+    ///
+    /// See [`CreatePoll`] for more information on creating and configuring a poll.
+    pub fn poll(mut self, poll: CreatePoll<Ready>) -> Self {
+        self.poll = Some(poll);
+        self
+    }
+
     super::button_and_select_menu_convenience_methods!(self.components);
 }
 
 // Same as CommandOptionChoice according to Discord, see
-// [Autocomplete docs](https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-autocomplete).
+// [Autocomplete docs](https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-response-object-autocomplete).
 #[must_use]
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(transparent)]
@@ -332,7 +354,7 @@ impl<S: Into<String>> From<S> for AutocompleteChoice {
     }
 }
 
-/// [Discord docs](https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-autocomplete)
+/// [Discord docs](https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-response-object-autocomplete)
 #[derive(Clone, Debug, Default, Serialize)]
 #[must_use]
 pub struct CreateAutocompleteResponse {
@@ -349,7 +371,7 @@ impl CreateAutocompleteResponse {
     ///
     /// See the official docs on [`Application Command Option Choices`] for more information.
     ///
-    /// [`Application Command Option Choices`]: https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-choice-structure
+    /// [`Application Command Option Choices`]: https://docs.discord.com/developers/interactions/application-commands#application-command-object-application-command-option-choice-structure
     pub fn set_choices(mut self, choices: Vec<AutocompleteChoice>) -> Self {
         self.choices = choices;
         self
@@ -405,7 +427,7 @@ impl Builder for CreateAutocompleteResponse {
     }
 }
 
-/// [Discord docs](https://discord.com/developers/docs/interactions/receiving-and-responding#interaction-response-object-modal).
+/// [Discord docs](https://docs.discord.com/developers/interactions/receiving-and-responding#interaction-response-object-modal).
 #[derive(Clone, Debug, Default, Serialize)]
 #[must_use]
 pub struct CreateModal {

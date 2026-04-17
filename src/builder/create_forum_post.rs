@@ -7,7 +7,7 @@ use crate::http::CacheHttp;
 use crate::internal::prelude::*;
 use crate::model::prelude::*;
 
-/// [Discord docs](https://discord.com/developers/docs/resources/channel#start-thread-in-forum-channel).
+/// [Discord docs](https://docs.discord.com/developers/resources/channel#start-thread-in-forum-or-media-channel).
 #[derive(Clone, Debug, Serialize)]
 #[must_use]
 pub struct CreateForumPost<'a> {
@@ -96,7 +96,7 @@ impl<'a> CreateForumPost<'a> {
 
 #[cfg(feature = "http")]
 #[async_trait::async_trait]
-impl<'a> Builder for CreateForumPost<'a> {
+impl Builder for CreateForumPost<'_> {
     type Context<'ctx> = ChannelId;
     type Built = GuildChannel;
 

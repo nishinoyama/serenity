@@ -33,7 +33,7 @@ pub const USER_AGENT: &str = concat!(
 enum_number! {
     /// An enum representing the [gateway opcodes].
     ///
-    /// [Discord docs](https://discord.com/developers/docs/topics/opcodes-and-status-codes#gateway-gateway-opcodes).
+    /// [Discord docs](https://docs.discord.com/developers/topics/opcodes-and-status-codes#gateway-gateway-opcodes).
     #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Deserialize, Serialize)]
     #[serde(from = "u8", into = "u8")]
     #[non_exhaustive]
@@ -62,6 +62,8 @@ enum_number! {
         Hello = 10,
         /// Sent immediately following a client heartbeat that was received.
         HeartbeatAck = 11,
+        /// Used to request soundboard sounds from a list of guilds.
+        ReqeustSoundboardSounds = 31,
         _ => Unknown(u8),
     }
 }

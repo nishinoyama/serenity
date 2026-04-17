@@ -10,7 +10,7 @@ use crate::model::prelude::*;
 ///
 /// Except [`Self::name`], all fields are optional.
 ///
-/// [Discord docs](https://discord.com/developers/docs/resources/guild#create-guild-channel).
+/// [Discord docs](https://docs.discord.com/developers/resources/guild#create-guild-channel).
 #[derive(Clone, Debug, Serialize)]
 #[must_use]
 pub struct CreateChannel<'a> {
@@ -256,7 +256,7 @@ impl<'a> CreateChannel<'a> {
 
 #[cfg(feature = "http")]
 #[async_trait::async_trait]
-impl<'a> Builder for CreateChannel<'a> {
+impl Builder for CreateChannel<'_> {
     type Context<'ctx> = GuildId;
     type Built = GuildChannel;
 

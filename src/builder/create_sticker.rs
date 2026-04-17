@@ -10,7 +10,7 @@ use crate::model::prelude::*;
 
 /// A builder to create a guild sticker
 ///
-/// [Discord docs](https://discord.com/developers/docs/resources/sticker#create-guild-sticker)
+/// [Discord docs](https://docs.discord.com/developers/resources/sticker#create-guild-sticker)
 #[derive(Clone, Debug)]
 #[must_use]
 pub struct CreateSticker<'a> {
@@ -74,7 +74,7 @@ impl<'a> CreateSticker<'a> {
 
 #[cfg(feature = "http")]
 #[async_trait::async_trait]
-impl<'a> Builder for CreateSticker<'a> {
+impl Builder for CreateSticker<'_> {
     type Context<'ctx> = GuildId;
     type Built = Sticker;
 

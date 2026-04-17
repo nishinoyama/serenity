@@ -8,7 +8,7 @@ use crate::internal::prelude::*;
 #[cfg(feature = "http")]
 use crate::model::prelude::*;
 
-/// [Discord docs](https://discord.com/developers/docs/resources/webhook#create-webhook)
+/// [Discord docs](https://docs.discord.com/developers/resources/webhook#create-webhook)
 #[derive(Clone, Debug, Serialize)]
 #[must_use]
 pub struct CreateWebhook<'a> {
@@ -53,7 +53,7 @@ impl<'a> CreateWebhook<'a> {
 
 #[cfg(feature = "http")]
 #[async_trait::async_trait]
-impl<'a> Builder for CreateWebhook<'a> {
+impl Builder for CreateWebhook<'_> {
     type Context<'ctx> = ChannelId;
     type Built = Webhook;
 

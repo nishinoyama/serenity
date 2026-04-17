@@ -45,11 +45,11 @@
 //! [`examples`]: https://github.com/serenity-rs/serenity/blob/current/examples
 //! [cache docs]: crate::cache
 //! [client's module-level documentation]: crate::client
-//! [docs]: https://discord.com/developers/docs/intro
+//! [docs]: https://docs.discord.com/developers/intro
 //! [examples]: https://github.com/serenity-rs/serenity/tree/current/examples
 //! [gateway docs]: crate::gateway
 #![doc(html_root_url = "https://docs.rs/serenity/*")]
-#![cfg_attr(docsrs, feature(doc_auto_cfg))]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![warn(
     unused,
     rust_2018_idioms,
@@ -66,6 +66,7 @@
     // Allowed to avoid breaking changes.
     clippy::module_name_repetitions,
     clippy::struct_excessive_bools,
+    clippy::result_large_err,
     clippy::unused_self,
     // Allowed as they are too pedantic
     clippy::cast_possible_truncation,

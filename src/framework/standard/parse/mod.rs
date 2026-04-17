@@ -30,7 +30,7 @@ fn permissions_in(
     roles: &HashMap<RoleId, Role>,
 ) -> Permissions {
     let guild = ctx.cache.guild(guild_id);
-    if guild.as_ref().map(|guild| member.user.id == guild.owner_id) == Some(true) {
+    if guild.as_ref().is_some_and(|guild| member.user.id == guild.owner_id) {
         return Permissions::all();
     }
 
@@ -69,7 +69,7 @@ fn permissions_in(
             }
         }
 
-        data.sort_by(|a, b| a.0.cmp(&b.0));
+        data.sort_by_key(|a| a.0);
 
         for overwrite in data {
             permissions = (permissions & !overwrite.1) | overwrite.2;
@@ -311,7 +311,7 @@ fn parse_cmd<'a>(
             };
         }
 
-        Err(ParseError::UnrecognisedCommand(Some(n.to_string())))
+        Err(ParseError::UnrecognisedCommand(Some(n)))
     }
     .boxed()
 }

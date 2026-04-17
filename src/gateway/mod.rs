@@ -70,7 +70,7 @@ pub struct PresenceData {
 }
 
 /// Activity data of the current user.
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, PartialEq, Eq)]
 pub struct ActivityData {
     /// The name of the activity
     pub name: String,
@@ -254,7 +254,7 @@ pub enum ReconnectType {
     Resume,
 }
 
-/// [Discord docs](https://discord.com/developers/docs/topics/gateway-events#request-guild-members).
+/// [Discord docs](https://docs.discord.com/developers/events/gateway-events#request-guild-members).
 #[derive(Clone, Debug)]
 pub enum ChunkGuildFilter {
     /// Returns all members of the guilds specified. Requires GUILD_MEMBERS intent.

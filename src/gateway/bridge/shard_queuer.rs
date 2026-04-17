@@ -138,13 +138,9 @@ impl ShardQueuer {
         let duration = Duration::from_secs(WAIT_BETWEEN_BOOTS_IN_SECONDS);
         let elapsed = instant.elapsed();
 
-        if elapsed >= duration {
-            return;
+        if let Some(to_sleep) = duration.checked_sub(elapsed) {
+            sleep(to_sleep).await;
         }
-
-        let to_sleep = duration - elapsed;
-
-        sleep(to_sleep).await;
     }
 
     #[instrument(skip(self))]
@@ -200,7 +196,7 @@ impl ShardQueuer {
         };
 
         spawn_named("shard_queuer::stop", async move {
-            drop(runner.run().await);
+            drop(Box::pin(runner.run()).await);
             debug!("[ShardRunner {:?}] Stopping", runner.shard.shard_info());
         });
 

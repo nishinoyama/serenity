@@ -194,6 +194,10 @@ routes! ('a, {
     api!("/channels/{}/polls/{}/expire", channel_id, message_id),
     Some(RatelimitingKind::PathAndId(channel_id.into()));
 
+    ChannelVoiceStatus { channel_id: ChannelId },
+    api!("/channels/{}/voice-status", channel_id),
+    Some(RatelimitingKind::PathAndId(channel_id.into()));
+
     Gateway,
     api!("/gateway"),
     Some(RatelimitingKind::Path);
@@ -306,6 +310,10 @@ routes! ('a, {
     api!("/guilds/{}/roles", guild_id),
     Some(RatelimitingKind::PathAndId(guild_id.into()));
 
+    GuildRoleMemberCounts { guild_id: GuildId },
+    api!("/guilds/{}/roles/member-counts", guild_id),
+    Some(RatelimitingKind::PathAndId(guild_id.into()));
+
     GuildScheduledEvent { guild_id: GuildId, event_id: ScheduledEventId },
     api!("/guilds/{}/scheduled-events/{}", guild_id, event_id),
     Some(RatelimitingKind::PathAndId(guild_id.into()));
@@ -350,6 +358,10 @@ routes! ('a, {
     api!("/guilds/{}/threads/active", guild_id),
     Some(RatelimitingKind::PathAndId(guild_id.into()));
 
+    GuildIncidentActions { guild_id: GuildId },
+    api!("/guilds/{}/incident-actions", guild_id),
+    Some(RatelimitingKind::PathAndId(guild_id.into()));
+
     Guilds,
     api!("/guilds"),
     Some(RatelimitingKind::Path);
@@ -361,6 +373,22 @@ routes! ('a, {
     Oauth2ApplicationCurrent,
     api!("/oauth2/applications/@me"),
     None;
+
+    SoundboardSend { channel_id: ChannelId },
+    api!("/channels/{}/send-soundboard-sound", channel_id),
+    Some(RatelimitingKind::PathAndId(channel_id.into()));
+
+    SoundboardDefaultSounds,
+    api!("/soundboard-default-sounds"),
+    Some(RatelimitingKind::Path);
+
+    GuildSoundboards { guild_id: GuildId },
+    api!("/guilds/{}/soundboard-sounds", guild_id),
+    Some(RatelimitingKind::PathAndId(guild_id.into()));
+
+    GuildSoundboard { guild_id: GuildId, sound_id: SoundId },
+    api!("/guilds/{}/soundboard-sounds/{}", guild_id, sound_id),
+    Some(RatelimitingKind::PathAndId(guild_id.into()));
 
     StatusIncidentsUnresolved,
     status!("/incidents/unresolved.json"),
@@ -380,6 +408,10 @@ routes! ('a, {
 
     StickerPacks,
     api!("/sticker-packs"),
+    Some(RatelimitingKind::Path);
+
+    StickerPack { sticker_pack_id: StickerPackId },
+    api!("/sticker-packs/{}", sticker_pack_id),
     Some(RatelimitingKind::Path);
 
     User { user_id: UserId },
@@ -470,8 +502,20 @@ routes! ('a, {
     api!("/applications/{}/skus", application_id),
     Some(RatelimitingKind::PathAndId(application_id.into()));
 
+    Emoji { application_id: ApplicationId, emoji_id: EmojiId },
+    api!("/applications/{}/emojis/{}", application_id, emoji_id),
+    Some(RatelimitingKind::PathAndId(application_id.into()));
+
+    Emojis { application_id: ApplicationId },
+    api!("/applications/{}/emojis", application_id),
+    Some(RatelimitingKind::PathAndId(application_id.into()));
+
     Entitlement { application_id: ApplicationId, entitlement_id: EntitlementId },
     api!("/applications/{}/entitlements/{}", application_id, entitlement_id),
+    Some(RatelimitingKind::PathAndId(application_id.into()));
+
+    ConsumeEntitlement { application_id: ApplicationId, entitlement_id: EntitlementId },
+    api!("/applications/{}/entitlements/{}/consume", application_id, entitlement_id),
     Some(RatelimitingKind::PathAndId(application_id.into()));
 
     Entitlements { application_id: ApplicationId },

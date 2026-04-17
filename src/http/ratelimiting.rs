@@ -33,7 +33,7 @@
 //! associated u64 as data. This is the Id of the parameter, differentiating between different
 //! ratelimits.
 //!
-//! [Taken from]: https://discord.com/developers/docs/topics/rate-limits#rate-limits
+//! [Taken from]: https://docs.discord.com/developers/topics/rate-limits
 
 use std::collections::HashMap;
 use std::fmt;
@@ -111,10 +111,10 @@ impl Ratelimiter {
     /// The bot token must be prefixed with `"Bot "`. The ratelimiter does not prefix it.
     #[must_use]
     pub fn new(client: Client, token: impl Into<String>) -> Self {
-        Self::_new(client, token.into())
+        Self::new_(client, token.into())
     }
 
-    fn _new(client: Client, token: String) -> Self {
+    fn new_(client: Client, token: String) -> Self {
         Self {
             client,
             global: Arc::default(),
@@ -263,7 +263,7 @@ impl Ratelimiter {
 /// **Note**: You should _not_ mutate any of the fields, as this can help cause 429s.
 ///
 /// [`Http`]: super::Http
-/// [Discord docs]: https://discord.com/developers/docs/topics/rate-limits
+/// [Discord docs]: https://docs.discord.com/developers/topics/rate-limits
 #[derive(Debug)]
 pub struct Ratelimit {
     /// The total number of requests that can be made in a period of time.
@@ -323,6 +323,9 @@ impl Ratelimit {
         self.remaining -= 1;
     }
 
+    /// # Errors
+    ///
+    /// Errors if parsing headers from the response fails.
     #[instrument(skip(ratelimit_callback))]
     pub async fn post_hook(
         &mut self,

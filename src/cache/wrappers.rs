@@ -12,7 +12,7 @@ use typesize::TypeSize;
 
 #[derive(Debug)]
 /// A wrapper around Option<DashMap<K, V>> to ease disabling specific cache fields.
-pub(crate) struct MaybeMap<K: Eq + Hash, V>(pub(super) Option<DashMap<K, V, BuildHasher>>);
+pub(crate) struct MaybeMap<K: Eq + Hash, V>(pub(crate) Option<DashMap<K, V, BuildHasher>>);
 impl<K: Eq + Hash, V> MaybeMap<K, V> {
     pub fn iter(&self) -> impl Iterator<Item = RefMulti<'_, K, V, BuildHasher>> {
         Option::iter(&self.0).flat_map(DashMap::iter)
@@ -68,7 +68,7 @@ impl<K: Eq + Hash + TypeSize, V: TypeSize> TypeSize for MaybeMap<K, V> {
 /// A wrapper around a reference to a MaybeMap, allowing for public inspection of the underlying
 /// map without allowing mutation of internal cache fields, which could cause issues.
 pub struct ReadOnlyMapRef<'a, K: Eq + Hash, V>(Option<&'a DashMap<K, V, BuildHasher>>);
-impl<'a, K: Eq + Hash, V> ReadOnlyMapRef<'a, K, V> {
+impl<K: Eq + Hash, V> ReadOnlyMapRef<'_, K, V> {
     pub fn iter(&self) -> impl Iterator<Item = RefMulti<'_, K, V, BuildHasher>> {
         self.0.into_iter().flat_map(DashMap::iter)
     }
@@ -81,7 +81,7 @@ impl<'a, K: Eq + Hash, V> ReadOnlyMapRef<'a, K, V> {
         self.0.map_or(0, DashMap::len)
     }
 }
-pub struct Hasher(fxhash::FxHasher);
+pub struct Hasher(rustc_hash::FxHasher);
 impl std::hash::Hasher for Hasher {
     fn finish(&self) -> u64 {
         self.0.finish()
@@ -92,7 +92,7 @@ impl std::hash::Hasher for Hasher {
     }
 }
 #[derive(Clone, Default)]
-pub struct BuildHasher(fxhash::FxBuildHasher);
+pub struct BuildHasher(rustc_hash::FxBuildHasher);
 impl std::hash::BuildHasher for BuildHasher {
     type Hasher = Hasher;
 
